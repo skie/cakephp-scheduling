@@ -1,4 +1,4 @@
-# Scheduling Plugin
+# CakePHP Scheduling Plugin
 
 The **Scheduling** plugin provides comprehensive task scheduling for CakePHP applications with the following features:
 
