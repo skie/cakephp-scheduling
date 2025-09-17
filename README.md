@@ -17,7 +17,7 @@ The plugin integrates seamlessly with CakePHP's console system and event manager
 * PHP 8.2+
 * SignalHandler Plugin (for graceful termination)
 
-See [Versions.md](Docs/Versions.md) for the supported CakePHP versions.
+See [Versions.md](docs/Versions.md) for the supported CakePHP versions.
 
 ## Documentation
 
