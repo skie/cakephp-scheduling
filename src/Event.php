@@ -542,13 +542,15 @@ class Event
      */
     public static function normalizeCommand(string $command): string
     {
-        $cakePath = DIRECTORY_SEPARATOR === '\\' ? 'bin\\cake.php' : 'bin/cake.php';
+        $cakePath = CommandBuilder::getCakeCommandPrefix();
 
         return str_replace([
+            'php',
+            'bin/cake.php',
+            'bin\\cake.php',
+        ], [
             PHP_BINARY,
             $cakePath,
-        ], [
-            'php',
             $cakePath,
         ], $command);
     }

@@ -55,9 +55,9 @@ class CommandBuilder
         $output = $this->escapeArgument($event->output);
         $redirect = $event->shouldAppendOutput ? ' >> ' : ' > ';
 
-        $finished = $this->normalizeCommandForOS('php bin/cake.php schedule finish "' . $event->mutexName() . '"');
+        $finished = $this->normalizeCommandForOS('php ' . self::getCakeCommandPrefix() . 'schedule finish "' . $event->mutexName() . '"');
 
-        if ($this->isWindows()) {
+        if (self::isWindows()) {
             return 'start /b cmd /v:on /c "(' . $command . ' & ' . $finished . ' ^!ERRORLEVEL^!)' . $redirect . $output . ' 2>&1"';
         }
 
@@ -88,7 +88,7 @@ class CommandBuilder
      */
     protected function escapeArgument(string $argument): string
     {
-        if ($this->isWindows()) {
+        if (self::isWindows()) {
             return '"' . str_replace('"', '""', $argument) . '"';
         }
 
@@ -100,9 +100,19 @@ class CommandBuilder
      *
      * @return bool True if Windows
      */
-    protected function isWindows(): bool
+    public static function isWindows(): bool
     {
         return DIRECTORY_SEPARATOR === '\\';
+    }
+
+    /**
+     * Get the CakePHP command prefix for the current OS.
+     *
+     * @return string The command prefix
+     */
+    public static function getCakeCommandPrefix(): string
+    {
+        return self::isWindows() ? 'bin\cake.php ' : 'bin/cake.php ';
     }
 
     /**
@@ -113,7 +123,7 @@ class CommandBuilder
      */
     protected function normalizeCommandForOS(string $command): string
     {
-        if ($this->isWindows()) {
+        if (self::isWindows()) {
             $command = str_replace('/', '\\', $command);
 
             if (str_starts_with($command, 'bin\\cake.php')) {

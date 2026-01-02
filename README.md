@@ -21,7 +21,7 @@ See [Versions.md](docs/Versions.md) for the supported CakePHP versions.
 
 ## Documentation
 
-For documentation, as well as tutorials, see the [Docs](docs/Home.md) directory of this repository.
+For documentation, as well as tutorials, see the [Docs](docs/index.md) directory of this repository.
 
 ## License
 

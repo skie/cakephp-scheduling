@@ -1,5 +1,7 @@
 # Task Scheduling
 
+## Table of Contents
+
 - [Introduction](#introduction)
 - [Installation](Installation.md)
 - [Defining Schedules](#defining-schedules)
@@ -18,6 +20,7 @@
 - [Task Output](Integration.md#task-output)
 - [Task Hooks](Integration.md#task-hooks)
 - [Events](Integration.md#events)
+- [Rhythm Widget](#rhythm-widget)
 - [API Reference](API-Reference.md)
 
 <a name="introduction"></a>
@@ -306,5 +309,66 @@ bin/cake schedule monitor list --format=json
 # Clean up old log data
 bin/cake schedule monitor prune --days=7
 ```
+
+<a name="rhythm-widget"></a>
+## Rhythm Widget
+
+The Scheduling plugin provides a Rhythm widget that displays real-time information about monitored scheduled tasks, including task counts by status and individual task details. The widget retrieves data from the Rhythm storage system using the `scheduled_tasks` recorder, which is automatically populated when tasks are executed with monitoring enabled.
+
+The widget displays summary statistics including total tasks count, running tasks count, failed tasks count, completed tasks count, overdue tasks count, and last update timestamp. Additionally, it shows detailed information for individual tasks, including task name, status, last run time, and execution details.
+
+### Configuration
+
+To enable the Scheduled Tasks widget, add the recorder and widget configuration to your Rhythm configuration file (`config/rhythm.php`):
+
+```php
+'Rhythm' => [
+    'recorders' => [
+        'Scheduling.scheduled_tasks' => [
+            'className' => \Scheduling\Recorder\ScheduledTasksRecorder::class,
+            'enabled' => true,
+            'sample_rate' => 1.0,
+            'throttle_seconds' => 15,
+        ],
+    ],
+    'widgets' => [
+        'Scheduling.scheduled_tasks' => [
+            'className' => \Scheduling\Widget\ScheduledTasksWidget::class,
+            'name' => 'Scheduled Tasks',
+            'cols' => ['default' => 12, 'lg' => 12],
+            'refreshInterval' => 15,
+        ],
+    ],
+],
+```
+
+**Recorder options:**
+- **className**: The recorder class that collects scheduled task data
+- **enabled**: Whether the recorder is active (default: `true`)
+- **sample_rate**: Sampling rate for data collection (0.0 to 1.0, default: `1.0`)
+- **throttle_seconds**: Minimum seconds between data updates (default: `15`)
+
+**Widget options:**
+- **className**: The widget class that displays the data
+- **name**: Display name for the widget
+- **cols**: Grid column configuration for responsive layout
+- **refreshInterval**: Data refresh interval in seconds (default: `15`)
+
+### Usage
+
+Add the widget to a Rhythm layout in your configuration file:
+
+```php
+'Rhythm' => [
+    'layouts' => [
+        'default' => [
+            // ... other widgets ...
+            'Scheduling.scheduled_tasks' => ['cols' => ['default' => 12, 'lg' => 12]],
+        ],
+    ],
+],
+```
+
+The widget will automatically appear in the dashboard when the layout is active. Ensure that tasks are configured with monitoring enabled using the `useMonitoring()` method for data to appear in the widget.
 
 For more advanced topics like task output, hooks, and events, see the [Integration guide](Integration.md).
