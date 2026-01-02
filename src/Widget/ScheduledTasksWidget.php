@@ -27,7 +27,7 @@ class ScheduledTasksWidget extends BaseWidget
 
                 $summary = [];
 
-                if ($summaryValues !== null && $summaryValues->count() > 0) {
+                if ($summaryValues->count() > 0) {
                     $summaryData = $summaryValues->first();
                     if ($summaryData && $summaryData->value) {
                         $summary = json_decode($summaryData->value, true) ?: [];
@@ -37,7 +37,7 @@ class ScheduledTasksWidget extends BaseWidget
                 $detailsValues = $this->rhythm->getStorage()->values('scheduled_tasks', ['details']);
 
                 $taskDetails = [];
-                if ($detailsValues !== null && $detailsValues->count() > 0) {
+                if ($detailsValues->count() > 0) {
                     $detailsData = $detailsValues->first();
                     if ($detailsData && $detailsData->value) {
                         $taskDetails = json_decode($detailsData->value, true) ?: [];
