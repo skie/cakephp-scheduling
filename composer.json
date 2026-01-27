@@ -11,7 +11,8 @@
         "skie/signal_handler": "^1.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.0",
+        "phpunit/phpunit": "^10.5 | ^12.5",
+        "skie/rhythm": "^1.0",
         "cakephp/cakephp-codesniffer": "^4.0"
     },
     "autoload": {
@@ -27,12 +28,23 @@
         }
     },
     "scripts": {
+        "check": [
+            "@cs-check",
+            "@test",
+            "@analyse"
+        ],
+        "analyse": [
+            "@stan"
+        ],
         "cs-check": "phpcs -p --standard=phpcs.xml src/ tests/",
         "cs-fix": "phpcbf --standard=phpcs.xml src/ tests/",
         "test": "phpunit",
         "test:unit": "phpunit --testsuite=Unit",
         "test:integration": "phpunit --testsuite=Integration",
         "test:coverage": "phpunit --coverage-html coverage",
+        "rector-setup": "cp composer.json composer.backup && composer require --dev rector/rector:\"^2.1\" && mv composer.backup composer.json",
+        "rector-check": "vendor/bin/rector process --dry-run",
+        "rector-fix": "vendor/bin/rector process",
         "stan": "tools/phpstan analyse src/",
         "psalm": "tools/psalm --show-info=false",
         "stan-tests": "tools/phpstan analyze -c tests/phpstan.neon",

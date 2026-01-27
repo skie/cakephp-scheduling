@@ -40,6 +40,7 @@ class ScheduleMonitorService
      */
     public function syncMonitoredTasks(): array
     {
+        /** @var \Scheduling\Model\Table\MonitoredScheduledTasksTable $monitoredTasksTable */
         $monitoredTasksTable = TableRegistry::getTableLocator()->get('Scheduling.MonitoredScheduledTasks');
 
         $events = $this->schedule->events();
@@ -171,7 +172,7 @@ class ScheduleMonitorService
     protected function getEventType(Event $event, ?string $command): string
     {
         if ($command === null) {
-            return 'callback';
+            return SchedulingMonitor::EVENT_TYPE_CALLBACK;
         }
 
         return SchedulingMonitor::getEventType($event, $command);
