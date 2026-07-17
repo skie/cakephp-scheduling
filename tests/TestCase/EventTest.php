@@ -113,8 +113,7 @@ class EventTest extends TestCase
     public function testMutexPreventsOverlappingExecution(): void
     {
         $mutex = $this->createMock(\Scheduling\EventMutexInterface::class);
-        $mutex->method('exists')->willReturn(true);
-        $mutex->method('create')->willReturn(false);
+        $mutex->expects($this->once())->method('create')->willReturn(false);
 
         $event = new Event($mutex, 'php -v');
         $event->withoutOverlapping();

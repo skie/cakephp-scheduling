@@ -11,14 +11,12 @@ namespace Scheduling;
 class SchedulingMonitor
 {
     /**
-     * Check if the current OS is Windows.
-     *
-     * @return bool True if Windows
+     * Event type constants
      */
-    public static function isWindows(): bool
-    {
-        return DIRECTORY_SEPARATOR === '\\';
-    }
+    public const EVENT_TYPE_CALLBACK = 'callback';
+    public const EVENT_TYPE_CAKE_COMMAND = 'cake_command';
+    public const EVENT_TYPE_EXEC = 'exec';
+    public const EVENT_TYPE_UNKNOWN = 'unknown-event';
 
     /**
      * Get the CakePHP command prefix for the current OS.
@@ -27,7 +25,7 @@ class SchedulingMonitor
      */
     public static function getCakeCommandPrefix(): string
     {
-        return self::isWindows() ? 'bin\cake.php ' : 'bin/cake.php ';
+        return CommandBuilder::getCakeCommandPrefix();
     }
 
     /**
@@ -59,7 +57,7 @@ class SchedulingMonitor
      */
     public static function isCakeCommand(string $command): bool
     {
-        $cakeCommand = self::getCakeCommandPrefix();
+        $cakeCommand = CommandBuilder::getCakeCommandPrefix();
 
         return strpos($command, $cakeCommand) === 0;
     }
@@ -74,14 +72,14 @@ class SchedulingMonitor
     public static function getEventType($event, ?string $command): string
     {
         if ($event instanceof \Scheduling\CallbackEvent) {
-            return 'callback';
+            return self::EVENT_TYPE_CALLBACK;
         }
 
         if (!empty($command) && self::isCakeCommand($command)) {
-            return 'cake_command';
+            return self::EVENT_TYPE_CAKE_COMMAND;
         }
 
-        return 'exec';
+        return self::EVENT_TYPE_EXEC;
     }
 
     /**
@@ -103,10 +101,10 @@ class SchedulingMonitor
 
         if (empty($command)) {
             if ($event instanceof \Scheduling\CallbackEvent) {
-                return 'callback-' . uniqid();
+                return self::EVENT_TYPE_CALLBACK . '-' . uniqid();
             }
 
-            return 'unknown-event';
+            return self::EVENT_TYPE_UNKNOWN;
         }
 
         return self::generateNameFromCommand($command);

@@ -20,7 +20,7 @@ class ScheduledTaskStartingTest extends TestCase
 
     public function testEventContainsCorrectData(): void
     {
-        $command = $this->createMock(BaseSchedulerCommand::class);
+        $command = $this->createStub(BaseSchedulerCommand::class);
         $event = $this->createEvent('php -v');
 
         $scheduledEvent = new ScheduledTaskStarting($command, $event);
@@ -32,7 +32,7 @@ class ScheduledTaskStartingTest extends TestCase
 
     public function testEventCanBeDispatched(): void
     {
-        $command = $this->createMock(BaseSchedulerCommand::class);
+        $command = $this->createStub(BaseSchedulerCommand::class);
         $event = $this->createEvent('php -v');
 
         $scheduledEvent = new ScheduledTaskStarting($command, $event);

@@ -123,7 +123,7 @@ class Schedule
             $command .= ' ' . $this->compileParameters($parameters);
         }
 
-        $cakeCommand = DIRECTORY_SEPARATOR === '\\' ? 'bin\\cake.php ' : 'bin/cake.php ';
+        $cakeCommand = CommandBuilder::getCakeCommandPrefix();
 
         return $this->exec($cakeCommand . $command);
     }

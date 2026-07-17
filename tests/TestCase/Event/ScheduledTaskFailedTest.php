@@ -20,7 +20,7 @@ class ScheduledTaskFailedTest extends TestCase
 
     public function testEventContainsCorrectData(): void
     {
-        $command = $this->createMock(BaseSchedulerCommand::class);
+        $command = $this->createStub(BaseSchedulerCommand::class);
         $event = $this->createEvent('php -v');
         $exception = new \Exception('Command failed');
 
@@ -34,7 +34,7 @@ class ScheduledTaskFailedTest extends TestCase
 
     public function testEventCanBeDispatched(): void
     {
-        $command = $this->createMock(BaseSchedulerCommand::class);
+        $command = $this->createStub(BaseSchedulerCommand::class);
         $event = $this->createEvent('php -v');
         $exception = new \Exception('Command failed');
 
