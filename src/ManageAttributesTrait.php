@@ -29,7 +29,7 @@ trait ManageAttributesTrait
      *
      * @var \DateTimeZone|string|null
      */
-    public $timezone = null;
+    public $timezone;
 
     /**
      * The user the command should run as.
@@ -229,9 +229,7 @@ trait ManageAttributesTrait
      */
     public function when($callback)
     {
-        $this->filters[] = is_callable($callback) ? $callback : function () use ($callback) {
-            return $callback;
-        };
+        $this->filters[] = is_callable($callback) ? $callback : (fn() => $callback);
 
         return $this;
     }
@@ -244,9 +242,7 @@ trait ManageAttributesTrait
      */
     public function skip($callback)
     {
-        $this->rejects[] = is_callable($callback) ? $callback : function () use ($callback) {
-            return $callback;
-        };
+        $this->rejects[] = is_callable($callback) ? $callback : (fn() => $callback);
 
         return $this;
     }

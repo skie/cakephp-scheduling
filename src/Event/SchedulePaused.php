@@ -22,6 +22,6 @@ class SchedulePaused extends Event
      */
     public function __construct(BaseSchedulerCommand $subject)
     {
-        parent::__construct('Scheduling.SchedulePaused', $subject, []);
+        parent::__construct('Scheduling.SchedulePaused', $subject);
     }
 }

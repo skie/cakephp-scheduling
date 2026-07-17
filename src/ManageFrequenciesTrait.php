@@ -61,7 +61,7 @@ trait ManageFrequenciesTrait
     {
         $now = Chronos::now();
 
-        return function () use ($startTime, $endTime, $now) {
+        return function () use ($startTime, $endTime, $now): bool {
             $current = $now;
 
             if ($this->timezone) {
@@ -599,6 +599,7 @@ trait ManageFrequenciesTrait
                 if (!is_int($day)) {
                     throw new InvalidArgumentException('daysOfMonth() expects int days or a single int array.');
                 }
+
                 $normalizedDays[] = $day;
             }
         }

@@ -141,9 +141,7 @@ class MonitoredScheduledTaskLogItemsTable extends Table
      */
     public function findByTaskName(SelectQuery $query, array $options): SelectQuery
     {
-        return $query->matching('MonitoredScheduledTasks', function (SelectQuery $q) use ($options) {
-            return $q->where(['MonitoredScheduledTasks.name' => $options['task_name']]);
-        });
+        return $query->matching('MonitoredScheduledTasks', fn(SelectQuery $q) => $q->where(['MonitoredScheduledTasks.name' => $options['task_name']]));
     }
 
     /**
@@ -267,7 +265,7 @@ class MonitoredScheduledTaskLogItemsTable extends Table
         $query = $this->findByTask($this->find(), ['task_id' => $taskId])
             ->where(['type' => MonitoredScheduledTaskLogItem::TYPE_FAILED]);
 
-        if ($since) {
+        if ($since instanceof \Cake\I18n\DateTime) {
             $query->where(['created >=' => $since]);
         }
 
@@ -286,7 +284,7 @@ class MonitoredScheduledTaskLogItemsTable extends Table
         $query = $this->findByTask($this->find(), ['task_id' => $taskId])
             ->where(['type' => MonitoredScheduledTaskLogItem::TYPE_FINISHED]);
 
-        if ($since) {
+        if ($since instanceof \Cake\I18n\DateTime) {
             $query->where(['created >=' => $since]);
         }
 
@@ -305,16 +303,14 @@ class MonitoredScheduledTaskLogItemsTable extends Table
         $query = $this->findByTask($this->find(), ['task_id' => $taskId])
             ->where(['type' => MonitoredScheduledTaskLogItem::TYPE_FINISHED]);
 
-        if ($since) {
+        if ($since instanceof \Cake\I18n\DateTime) {
             $query->where(['created >=' => $since]);
         }
 
         $items = $query->toArray();
-        $runtimes = array_filter(array_map(function ($item) {
-            return $item->getRuntime();
-        }, $items));
+        $runtimes = array_filter(array_map(fn($item) => $item->getRuntime(), $items));
 
-        if (empty($runtimes)) {
+        if ($runtimes === []) {
             return null;
         }
 

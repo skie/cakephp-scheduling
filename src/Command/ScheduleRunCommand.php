@@ -70,7 +70,7 @@ class ScheduleRunCommand extends BaseSchedulerCommand
             Schedule::clearInterruptSignal();
         }
 
-        if (empty($dueEvents)) {
+        if ($dueEvents === []) {
             if ($verbose) {
                 $io->info('No scheduled events are due to run.');
             }
@@ -86,7 +86,7 @@ class ScheduleRunCommand extends BaseSchedulerCommand
         try {
             $service = new ScheduleMonitorService($schedule);
             $service->syncMonitoredTasks();
-        } catch (\Exception $e) {
+        } catch (\Exception) {
         }
 
         $paused = Schedule::isPaused();
@@ -110,6 +110,7 @@ class ScheduleRunCommand extends BaseSchedulerCommand
                 if ($verbose) {
                     $io->info(sprintf('Skipping [%s] because the command already ran on another server.', $event->getSummaryForDisplay()));
                 }
+
                 continue;
             }
 
@@ -118,15 +119,13 @@ class ScheduleRunCommand extends BaseSchedulerCommand
             }
         }
 
-        $repeatableEvents = array_filter($dueEvents, function ($event) {
-            return $event->isRepeatable();
-        });
+        $repeatableEvents = array_filter($dueEvents, fn($event) => $event->isRepeatable());
 
         if ($verbose) {
             $io->info(sprintf('Found %d repeatable events out of %d total events', count($repeatableEvents), count($dueEvents)));
         }
 
-        if (!empty($repeatableEvents)) {
+        if ($repeatableEvents !== []) {
             $this->repeatEvents($repeatableEvents, $io, $verbose);
         }
 
@@ -171,10 +170,10 @@ class ScheduleRunCommand extends BaseSchedulerCommand
             }
 
             return true;
-        } catch (\Throwable $e) {
-            $this->dispatchSchedulerEvent(new ScheduledTaskFailed($this, $event, $e));
+        } catch (\Throwable $throwable) {
+            $this->dispatchSchedulerEvent(new ScheduledTaskFailed($this, $event, $throwable));
 
-            $io->error(sprintf('Failed to run scheduled command: %s - %s', $summary, $e->getMessage()));
+            $io->error(sprintf('Failed to run scheduled command: %s - %s', $summary, $throwable->getMessage()));
 
             return false;
         }
@@ -204,9 +203,6 @@ class ScheduleRunCommand extends BaseSchedulerCommand
                 count($events),
                 $endOfMinute->format('H:i:s')
             ));
-        }
-
-        if ($verbose) {
             foreach ($events as $event) {
                 $io->info(sprintf('  - %s (repeat every %ds)', $event->getSummaryForDisplay(), $event->repeatSeconds));
             }
@@ -238,6 +234,7 @@ class ScheduleRunCommand extends BaseSchedulerCommand
                     if ($verbose) {
                         $io->info(sprintf('Skipping repeatable [%s] - overlapping execution.', $event->getSummaryForDisplay()));
                     }
+
                     continue;
                 }
 
@@ -245,6 +242,7 @@ class ScheduleRunCommand extends BaseSchedulerCommand
                     if ($verbose) {
                         $io->info(sprintf('Skipping repeatable [%s] - other filters did not pass.', $event->getSummaryForDisplay()));
                     }
+
                     continue;
                 }
 
@@ -254,6 +252,7 @@ class ScheduleRunCommand extends BaseSchedulerCommand
                         if ($verbose) {
                             $io->info(sprintf('Skipping repeatable [%s] because the command already ran on another server.', $event->getSummaryForDisplay()));
                         }
+
                         continue;
                     }
                 }

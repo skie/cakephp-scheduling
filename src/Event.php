@@ -207,7 +207,7 @@ class Event
             return false;
         }
 
-        if ($this->lastChecked === null) {
+        if (!$this->lastChecked instanceof \Cake\Chronos\Chronos) {
             return true;
         }
 
@@ -226,10 +226,10 @@ class Event
             $this->callBeforeCallbacks();
 
             return $this->execute();
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             $this->removeMutex();
 
-            throw $exception;
+            throw $throwable;
         }
     }
 
@@ -429,7 +429,7 @@ class Event
      */
     protected function shouldRepeat(): bool
     {
-        if ($this->lastChecked === null) {
+        if (!$this->lastChecked instanceof \Cake\Chronos\Chronos) {
             return true;
         }
 
@@ -580,7 +580,7 @@ class Event
     public function mutexName(): string
     {
         return 'schedule-' .
-            sha1($this->expression . $this->normalizeCommand($this->command ?? ''));
+            sha1($this->expression . static::normalizeCommand($this->command ?? ''));
     }
 
     /**

@@ -271,11 +271,7 @@ class MonitoredScheduledTasksTable extends Table
     {
         $existingTask = $this->find()->where(['name' => $taskData['name']])->first();
 
-        if ($existingTask) {
-            $task = $this->patchEntity($existingTask, $taskData);
-        } else {
-            $task = $this->newEntity($taskData);
-        }
+        $task = $existingTask ? $this->patchEntity($existingTask, $taskData) : $this->newEntity($taskData);
 
         return $this->saveOrFail($task);
     }
@@ -290,7 +286,7 @@ class MonitoredScheduledTasksTable extends Table
     public function markAsStarted(string $name, array $meta = []): ?MonitoredScheduledTask
     {
         $task = $this->getByName($name);
-        if (!$task) {
+        if (!$task instanceof \Crustum\Scheduling\Model\Entity\MonitoredScheduledTask) {
             return null;
         }
 
@@ -435,7 +431,7 @@ class MonitoredScheduledTasksTable extends Table
      */
     protected function formatDateTime(?DateTime $datetime, ?string $format = null): string
     {
-        if (!$datetime) {
+        if (!$datetime instanceof \Cake\I18n\DateTime) {
             return 'Never';
         }
 
@@ -475,7 +471,7 @@ class MonitoredScheduledTasksTable extends Table
     public function markAsStarting(string $taskName, array $meta = []): bool
     {
         $task = $this->getByName($taskName);
-        if (!$task) {
+        if (!$task instanceof \Crustum\Scheduling\Model\Entity\MonitoredScheduledTask) {
             return false;
         }
 
@@ -501,7 +497,7 @@ class MonitoredScheduledTasksTable extends Table
     public function markAsFinished(string $taskName, array $meta = []): bool
     {
         $task = $this->getByName($taskName);
-        if (!$task) {
+        if (!$task instanceof \Crustum\Scheduling\Model\Entity\MonitoredScheduledTask) {
             return false;
         }
 
@@ -527,7 +523,7 @@ class MonitoredScheduledTasksTable extends Table
     public function markAsFailed(string $taskName, array $meta = []): bool
     {
         $task = $this->getByName($taskName);
-        if (!$task) {
+        if (!$task instanceof \Crustum\Scheduling\Model\Entity\MonitoredScheduledTask) {
             return false;
         }
 
@@ -553,7 +549,7 @@ class MonitoredScheduledTasksTable extends Table
     public function markAsSkipped(string $taskName, array $meta = []): bool
     {
         $task = $this->getByName($taskName);
-        if (!$task) {
+        if (!$task instanceof \Crustum\Scheduling\Model\Entity\MonitoredScheduledTask) {
             return false;
         }
 

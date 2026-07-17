@@ -74,8 +74,8 @@ class ScheduleMonitorSyncCommand extends BaseSchedulerCommand
             }
 
             return static::CODE_SUCCESS;
-        } catch (\Exception $e) {
-            $io->error(sprintf('Error syncing schedule: %s', $e->getMessage()));
+        } catch (\Exception $exception) {
+            $io->error(sprintf('Error syncing schedule: %s', $exception->getMessage()));
 
             return static::CODE_ERROR;
         }

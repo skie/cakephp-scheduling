@@ -75,8 +75,8 @@ class ScheduleClearCacheCommand extends BaseSchedulerCommand
             $io->success('Scheduler mutex cache cleared successfully.');
 
             return static::CODE_SUCCESS;
-        } catch (\Throwable $e) {
-            $io->error(sprintf('Failed to clear cache: %s', $e->getMessage()));
+        } catch (\Throwable $throwable) {
+            $io->error(sprintf('Failed to clear cache: %s', $throwable->getMessage()));
 
             return static::CODE_ERROR;
         }
@@ -109,7 +109,6 @@ class ScheduleClearCacheCommand extends BaseSchedulerCommand
     protected function clearMutexesByPattern(string $store, string $pattern, ConsoleIo $io): void
     {
         $engine = Cache::pool($store);
-        $clearedCount = 0;
 
         $io->info(sprintf('Clearing mutexes matching pattern: %s', $pattern));
         $io->warning('Pattern-based clearing is not fully implemented in this version.');

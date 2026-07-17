@@ -63,9 +63,7 @@ class ScheduleFinishCommand extends BaseSchedulerCommand
         $schedule = $this->getSchedule();
         $events = $schedule->events();
 
-        $matchingEvents = array_filter($events, function ($event) use ($mutexName) {
-            return $event->mutexName() === $mutexName;
-        });
+        $matchingEvents = array_filter($events, fn($event): bool => $event->mutexName() === $mutexName);
 
         foreach ($matchingEvents as $event) {
             $event->finish($exitCode);

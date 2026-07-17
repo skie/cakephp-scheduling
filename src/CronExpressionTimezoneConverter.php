@@ -187,9 +187,7 @@ class CronExpressionTimezoneConverter
         }
 
         $shifted = array_map(
-            static function (string $value) use ($offset, $mod, $min): int {
-                return (((int)$value + $offset - $min) % $mod + $mod) % $mod + $min;
-            },
+            static fn(string $value): int => (((int)$value + $offset - $min) % $mod + $mod) % $mod + $min,
             explode(',', $field)
         );
 

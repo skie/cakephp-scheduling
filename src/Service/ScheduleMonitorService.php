@@ -75,7 +75,7 @@ class ScheduleMonitorService
         }
 
         $oldTasks = [];
-        if (!empty($currentNames)) {
+        if ($currentNames !== []) {
             $oldTasks = $monitoredTasksTable->find()
                 ->whereNotInList('name', $currentNames)
                 ->toArray();
@@ -111,7 +111,7 @@ class ScheduleMonitorService
             $command = null;
             try {
                 $command = $event->getCommand();
-            } catch (\LogicException $e) {
+            } catch (\LogicException) {
                 $command = null;
             }
 
@@ -132,7 +132,7 @@ class ScheduleMonitorService
                 'timezone' => $timezone,
                 'grace_time_in_minutes' => $graceTime,
             ];
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return null;
         }
     }

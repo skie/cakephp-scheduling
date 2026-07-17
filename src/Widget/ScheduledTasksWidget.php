@@ -21,7 +21,7 @@ class ScheduledTasksWidget extends BaseWidget
      */
     public function getData(array $options = []): array
     {
-        return $this->remember(function () {
+        return $this->remember(function (): array {
             try {
                 $summaryValues = $this->rhythm->getStorage()->values('scheduled_tasks', ['summary']);
 
@@ -30,7 +30,7 @@ class ScheduledTasksWidget extends BaseWidget
                 if ($summaryValues->count() > 0) {
                     $summaryData = $summaryValues->first();
                     if ($summaryData && $summaryData->value) {
-                        $summary = json_decode($summaryData->value, true) ?: [];
+                        $summary = json_decode((string)$summaryData->value, true) ?: [];
                     }
                 }
 
@@ -40,7 +40,7 @@ class ScheduledTasksWidget extends BaseWidget
                 if ($detailsValues->count() > 0) {
                     $detailsData = $detailsValues->first();
                     if ($detailsData && $detailsData->value) {
-                        $taskDetails = json_decode($detailsData->value, true) ?: [];
+                        $taskDetails = json_decode((string)$detailsData->value, true) ?: [];
                     }
                 }
 
@@ -54,7 +54,7 @@ class ScheduledTasksWidget extends BaseWidget
                     'overdue_tasks' => $summary['overdue'] ?? 0,
                     'last_updated' => $summary['timestamp'] ?? null,
                 ];
-            } catch (Exception $e) {
+            } catch (Exception $exception) {
                 return [
                     'summary' => [],
                     'tasks' => [],
@@ -64,7 +64,7 @@ class ScheduledTasksWidget extends BaseWidget
                     'completed_tasks' => 0,
                     'overdue_tasks' => 0,
                     'last_updated' => null,
-                    'error' => $e->getMessage(),
+                    'error' => $exception->getMessage(),
                 ];
             }
         }, 'scheduled_tasks_widget', $this->getRefreshInterval());

@@ -78,8 +78,8 @@ class ScheduledTasksRecorder extends BaseRecorder implements EventListenerInterf
                     json_encode($taskDetails, JSON_THROW_ON_ERROR),
                     $timestamp
                 );
-            } catch (\Exception $e) {
-                debug('ScheduledTasksRecorder error: ' . $e->getMessage());
+            } catch (\Exception $exception) {
+                debug('ScheduledTasksRecorder error: ' . $exception->getMessage());
             }
         });
     }

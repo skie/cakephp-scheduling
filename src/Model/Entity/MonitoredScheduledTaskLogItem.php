@@ -22,8 +22,11 @@ class MonitoredScheduledTaskLogItem extends Entity
      * Log item type constants.
      */
     public const TYPE_STARTING = 'starting';
+
     public const TYPE_FINISHED = 'finished';
+
     public const TYPE_FAILED = 'failed';
+
     public const TYPE_SKIPPED = 'skipped';
 
     /**

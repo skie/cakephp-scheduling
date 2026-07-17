@@ -173,7 +173,7 @@ class ScheduleMonitorListener implements EventListenerInterface
         if (is_object($task) && method_exists($task, 'getCommand')) {
             try {
                 $command = $task->getCommand();
-            } catch (\LogicException $e) {
+            } catch (\LogicException) {
                 $command = null;
             }
         }

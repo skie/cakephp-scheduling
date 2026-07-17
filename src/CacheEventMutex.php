@@ -35,9 +35,7 @@ class CacheEventMutex implements EventMutexInterface, CacheAwareInterface
             return false;
         }
 
-        $result = Cache::write($key, time(), $this->store);
-
-        return $result;
+        return Cache::write($key, time(), $this->store);
     }
 
     /**

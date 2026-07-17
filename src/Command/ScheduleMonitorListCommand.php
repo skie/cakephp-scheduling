@@ -58,9 +58,7 @@ class ScheduleMonitorListCommand extends BaseSchedulerCommand
             /** @var \Crustum\Scheduling\Model\Table\MonitoredScheduledTasksTable $MonitoredTasks */
             $MonitoredTasks = TableRegistry::getTableLocator()->get('Crustum/Scheduling.MonitoredScheduledTasks');
             $query = $MonitoredTasks->find()
-                ->contain(['MonitoredScheduledTaskLogItems' => function ($q) {
-                    return $q->orderByDesc('created')->limit(1);
-                }]);
+                ->contain(['MonitoredScheduledTaskLogItems' => fn($q) => $q->orderByDesc('created')->limit(1)]);
 
             $status = $args->getOption('status');
             if ($status) {
@@ -117,8 +115,8 @@ class ScheduleMonitorListCommand extends BaseSchedulerCommand
             ));
 
             return static::CODE_SUCCESS;
-        } catch (\Exception $e) {
-            $io->error(sprintf('Error listing tasks: %s', $e->getMessage()));
+        } catch (\Exception $exception) {
+            $io->error(sprintf('Error listing tasks: %s', $exception->getMessage()));
 
             return static::CODE_ERROR;
         }
@@ -152,6 +150,7 @@ class ScheduleMonitorListCommand extends BaseSchedulerCommand
                 $statusInfo['cron_expression'],
             ];
         }
+
         $io->helper('Table')->output($rows);
     }
 

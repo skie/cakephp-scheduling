@@ -14,8 +14,11 @@ class SchedulingMonitor
      * Event type constants
      */
     public const EVENT_TYPE_CALLBACK = 'callback';
+
     public const EVENT_TYPE_CAKE_COMMAND = 'cake_command';
+
     public const EVENT_TYPE_EXEC = 'exec';
+
     public const EVENT_TYPE_UNKNOWN = 'unknown-event';
 
     /**
@@ -42,7 +45,7 @@ class SchedulingMonitor
     public static function generateNameFromCommand(string $command): string
     {
         $cakeCommand = self::getCakeCommandPrefix();
-        if (strpos($command, $cakeCommand) === 0) {
+        if (str_starts_with($command, $cakeCommand)) {
             $commandName = substr($command, strlen($cakeCommand));
 
             return 'cake-' . str_replace(' ', '-', $commandName);
@@ -64,7 +67,7 @@ class SchedulingMonitor
     {
         $cakeCommand = CommandBuilder::getCakeCommandPrefix();
 
-        return strpos($command, $cakeCommand) === 0;
+        return str_starts_with($command, $cakeCommand);
     }
 
     /**

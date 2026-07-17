@@ -76,7 +76,7 @@ class CallbackEvent extends Event
     {
         parent::run();
 
-        if ($this->exception) {
+        if ($this->exception instanceof \Throwable) {
             throw $this->exception;
         }
     }
@@ -114,17 +114,19 @@ class CallbackEvent extends Event
                 if (!is_callable($this->callback)) {
                     throw new \LogicException('Object callback is not callable.');
                 }
+
                 $this->result = call_user_func_array($this->callback, $this->parameters);
             } else {
                 if (!is_callable($this->callback)) {
                     throw new \LogicException('Callback is not callable.');
                 }
+
                 $this->result = call_user_func_array($this->callback, $this->parameters);
             }
 
             return $this->result === false ? 1 : 0;
-        } catch (Throwable $e) {
-            $this->exception = $e;
+        } catch (Throwable $throwable) {
+            $this->exception = $throwable;
 
             return 1;
         }

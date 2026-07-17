@@ -103,8 +103,8 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
             if ($verbose) {
                 $io->info('Synced monitored tasks');
             }
-        } catch (\Exception $e) {
-            $io->warning(sprintf('Failed to sync monitored tasks: %s', $e->getMessage()));
+        } catch (\Exception $exception) {
+            $io->warning(sprintf('Failed to sync monitored tasks: %s', $exception->getMessage()));
         }
 
         $lastExecutionStartedAt = \Cake\Chronos\Chronos::now()->subMinutes(10);
@@ -176,7 +176,7 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
             Schedule::clearInterruptSignal();
         }
 
-        if (empty($dueEvents)) {
+        if ($dueEvents === []) {
             if ($verbose) {
                 $io->info('No scheduled events are due to run.');
             }
@@ -200,6 +200,7 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
                 if ($verbose) {
                     $io->info(sprintf('Skipping [%s] - scheduler is paused.', $event->getSummaryForDisplay()));
                 }
+
                 continue;
             }
 
@@ -207,6 +208,7 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
                 if ($verbose) {
                     $io->info(sprintf('Skipping [%s] - filters did not pass.', $event->getSummaryForDisplay()));
                 }
+
                 continue;
             }
 
@@ -214,21 +216,20 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
                 if ($verbose) {
                     $io->info(sprintf('Skipping [%s] because the command already ran on another server.', $event->getSummaryForDisplay()));
                 }
+
                 continue;
             }
 
             $this->runEvent($event, $io, $verbose);
         }
 
-        $repeatableEvents = array_filter($dueEvents, function ($event) {
-            return $event->isRepeatable();
-        });
+        $repeatableEvents = array_filter($dueEvents, fn($event) => $event->isRepeatable());
 
         if ($verbose) {
             $io->info(sprintf('Found %d repeatable events out of %d total events', count($repeatableEvents), count($dueEvents)));
         }
 
-        if (!empty($repeatableEvents)) {
+        if ($repeatableEvents !== []) {
             $this->repeatEvents($repeatableEvents, $io, $verbose);
         }
 
@@ -263,9 +264,6 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
                 count($events),
                 $endOfMinute->format('H:i:s')
             ));
-        }
-
-        if ($verbose) {
             foreach ($events as $event) {
                 $io->info(sprintf('  - %s (repeat every %ds)', $event->getSummaryForDisplay(), $event->repeatSeconds));
             }
@@ -296,6 +294,7 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
                     if ($verbose) {
                         $io->info(sprintf('Skipping repeatable [%s] - overlapping execution.', $event->getSummaryForDisplay()));
                     }
+
                     continue;
                 }
 
@@ -303,6 +302,7 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
                     if ($verbose) {
                         $io->info(sprintf('Skipping repeatable [%s] - other filters did not pass.', $event->getSummaryForDisplay()));
                     }
+
                     continue;
                 }
 
@@ -312,6 +312,7 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
                         if ($verbose) {
                             $io->info(sprintf('Skipping repeatable [%s] because the command already ran on another server.', $event->getSummaryForDisplay()));
                         }
+
                         continue;
                     }
                 }
@@ -357,8 +358,8 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
             if ($verbose) {
                 $io->success(sprintf('Successfully ran scheduled command: %s (%sms)', $summary, $runtime));
             }
-        } catch (\Throwable $e) {
-            $io->error(sprintf('Failed to run scheduled command: %s - %s', $summary, $e->getMessage()));
+        } catch (\Throwable $throwable) {
+            $io->error(sprintf('Failed to run scheduled command: %s - %s', $summary, $throwable->getMessage()));
         }
     }
 
@@ -373,6 +374,7 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
     {
         $io->out('');
         $io->info('Received termination signal. Stopping scheduler worker...');
+
         $this->isRunning = false;
     }
 }

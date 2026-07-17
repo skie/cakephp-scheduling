@@ -65,7 +65,7 @@ class ScheduleTestCommand extends BaseSchedulerCommand
         $schedule = $this->getSchedule();
         $events = $schedule->events();
 
-        if (empty($events)) {
+        if ($events === []) {
             $io->error('No scheduled events are defined.');
 
             return static::CODE_ERROR;
@@ -126,13 +126,13 @@ class ScheduleTestCommand extends BaseSchedulerCommand
             $io->success(sprintf('Command executed successfully in %sms.', $runtime));
 
             return static::CODE_SUCCESS;
-        } catch (\Throwable $e) {
-            $io->error(sprintf('Command failed: %s', $e->getMessage()));
+        } catch (\Throwable $throwable) {
+            $io->error(sprintf('Command failed: %s', $throwable->getMessage()));
 
             if ($verbose) {
                 $io->out('');
                 $io->out('Stack trace:');
-                $io->out($e->getTraceAsString());
+                $io->out($throwable->getTraceAsString());
             }
 
             return static::CODE_ERROR;

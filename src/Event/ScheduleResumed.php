@@ -22,6 +22,6 @@ class ScheduleResumed extends Event
      */
     public function __construct(BaseSchedulerCommand $subject)
     {
-        parent::__construct('Scheduling.ScheduleResumed', $subject, []);
+        parent::__construct('Scheduling.ScheduleResumed', $subject);
     }
 }

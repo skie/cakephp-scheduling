@@ -24,11 +24,17 @@ class Schedule
      * Day constants
      */
     public const SUNDAY = 0;
+
     public const MONDAY = 1;
+
     public const TUESDAY = 2;
+
     public const WEDNESDAY = 3;
+
     public const THURSDAY = 4;
+
     public const FRIDAY = 5;
+
     public const SATURDAY = 6;
 
     /**
@@ -152,7 +158,7 @@ class Schedule
      */
     public function command(string $command, array $parameters = []): Event
     {
-        if (count($parameters)) {
+        if ($parameters !== []) {
             $command .= ' ' . $this->compileParameters($parameters);
         }
 
@@ -170,7 +176,7 @@ class Schedule
      */
     public function exec(string $command, array $parameters = []): Event
     {
-        if (count($parameters)) {
+        if ($parameters !== []) {
             $command .= ' ' . $this->compileParameters($parameters);
         }
 
@@ -190,7 +196,7 @@ class Schedule
      */
     public function group(Closure $events): void
     {
-        if ($this->attributes === null) {
+        if (!$this->attributes instanceof \Crustum\Scheduling\PendingEventAttributes) {
             throw new RuntimeException('Invoke an attribute method such as Schedule::daily() before defining a schedule group.');
         }
 
@@ -268,13 +274,9 @@ class Schedule
 
         $keyString = (string)$key;
         if (str_starts_with($keyString, '--')) {
-            $compiled = array_map(function ($item) use ($keyString) {
-                return "{$keyString}={$item}";
-            }, $compiled);
+            $compiled = array_map(fn($item): string => "{$keyString}={$item}", $compiled);
         } elseif (str_starts_with($keyString, '-')) {
-            $compiled = array_map(function ($item) use ($keyString) {
-                return "{$keyString} {$item}";
-            }, $compiled);
+            $compiled = array_map(fn($item): string => "{$keyString} {$item}", $compiled);
         }
 
         return implode(' ', $compiled);
@@ -314,9 +316,7 @@ class Schedule
      */
     public function dueEvents(): array
     {
-        return array_filter($this->events, function (Event $event) {
-            return $event->isDue();
-        });
+        return array_filter($this->events, fn(Event $event): bool => $event->isDue());
     }
 
     /**
