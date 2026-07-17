@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Service;
+namespace Crustum\Scheduling\Service;
 
 use Cake\Core\Configure;
 use Cake\ORM\TableRegistry;
-use Scheduling\Event;
-use Scheduling\Schedule;
-use Scheduling\SchedulingMonitor;
+use Crustum\Scheduling\Event;
+use Crustum\Scheduling\Schedule;
+use Crustum\Scheduling\SchedulingMonitor;
 
 /**
  * Schedule Monitor Service
@@ -19,14 +19,14 @@ class ScheduleMonitorService
     /**
      * The schedule instance.
      *
-     * @var \Scheduling\Schedule
+     * @var \Crustum\Scheduling\Schedule
      */
     protected Schedule $schedule;
 
     /**
      * Constructor.
      *
-     * @param \Scheduling\Schedule $schedule The schedule instance
+     * @param \Crustum\Scheduling\Schedule $schedule The schedule instance
      */
     public function __construct(Schedule $schedule)
     {
@@ -40,8 +40,8 @@ class ScheduleMonitorService
      */
     public function syncMonitoredTasks(): array
     {
-        /** @var \Scheduling\Model\Table\MonitoredScheduledTasksTable $monitoredTasksTable */
-        $monitoredTasksTable = TableRegistry::getTableLocator()->get('Scheduling.MonitoredScheduledTasks');
+        /** @var \Crustum\Scheduling\Model\Table\MonitoredScheduledTasksTable $monitoredTasksTable */
+        $monitoredTasksTable = TableRegistry::getTableLocator()->get('Crustum/Scheduling.MonitoredScheduledTasks');
 
         $events = $this->schedule->events();
         $currentNames = [];
@@ -74,9 +74,14 @@ class ScheduleMonitorService
             $syncedCount++;
         }
 
-        $oldTasks = $monitoredTasksTable->find()
-            ->where(['name NOT IN' => $currentNames])
-            ->toArray();
+        $oldTasks = [];
+        if (!empty($currentNames)) {
+            $oldTasks = $monitoredTasksTable->find()
+                ->whereNotInList('name', $currentNames)
+                ->toArray();
+        } else {
+            $oldTasks = $monitoredTasksTable->find()->toArray();
+        }
 
         foreach ($oldTasks as $oldTask) {
             $monitoredTasksTable->delete($oldTask);
@@ -93,7 +98,7 @@ class ScheduleMonitorService
     /**
      * Extract monitoring data from a schedule event.
      *
-     * @param \Scheduling\Event $event The schedule event
+     * @param \Crustum\Scheduling\Event $event The schedule event
      * @return array<string, mixed>|null
      */
     protected function extractEventData(Event $event): ?array
@@ -135,7 +140,7 @@ class ScheduleMonitorService
     /**
      * Get the cron expression for the event.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @return string|null
      */
     protected function getCronExpression(Event $event): ?string
@@ -150,7 +155,7 @@ class ScheduleMonitorService
     /**
      * Get the timezone for the event.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @return string|null
      */
     protected function getEventTimezone(Event $event): ?string
@@ -165,7 +170,7 @@ class ScheduleMonitorService
     /**
      * Get the event type based on the event and command.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @param string|null $command The command string
      * @return string
      */

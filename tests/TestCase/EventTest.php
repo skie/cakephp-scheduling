@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Test\TestCase;
+namespace Crustum\Scheduling\Test\TestCase;
 
 use Cake\Chronos\Chronos;
 use Cake\TestSuite\TestCase;
-use Scheduling\CacheEventMutex;
-use Scheduling\Event;
+use Crustum\Scheduling\CacheEventMutex;
+use Crustum\Scheduling\Event;
 
 class EventTest extends TestCase
 {
@@ -112,7 +112,7 @@ class EventTest extends TestCase
 
     public function testMutexPreventsOverlappingExecution(): void
     {
-        $mutex = $this->createMock(\Scheduling\EventMutexInterface::class);
+        $mutex = $this->createMock(\Crustum\Scheduling\EventMutexInterface::class);
         $mutex->expects($this->once())->method('create')->willReturn(false);
 
         $event = new Event($mutex, 'php -v');
@@ -148,5 +148,286 @@ class EventTest extends TestCase
 
         $this->assertTrue($event->isRepeatable());
         $this->assertTrue($event->shouldRepeatNow());
+    }
+
+    public function testWhenWithCallable(): void
+    {
+        $event = $this->createEvent('php -v');
+        $result = $event->when(function () {
+            return true;
+        });
+
+        $this->assertSame($event, $result);
+        $this->assertTrue($event->filtersPass());
+    }
+
+    public function testWhenWithBooleanTrue(): void
+    {
+        $event = $this->createEvent('php -v');
+        $event->when(true);
+
+        $this->assertTrue($event->filtersPass());
+    }
+
+    public function testWhenWithBooleanFalse(): void
+    {
+        $event = $this->createEvent('php -v');
+        $event->when(false);
+
+        $this->assertFalse($event->filtersPass());
+    }
+
+    public function testWhenWithMultipleFilters(): void
+    {
+        $event = $this->createEvent('php -v');
+        $event->when(function () {
+            return true;
+        });
+        $event->when(function () {
+            return true;
+        });
+
+        $this->assertTrue($event->filtersPass());
+    }
+
+    public function testWhenWithMultipleFiltersOneFails(): void
+    {
+        $event = $this->createEvent('php -v');
+        $event->when(function () {
+            return true;
+        });
+        $event->when(function () {
+            return false;
+        });
+
+        $this->assertFalse($event->filtersPass());
+    }
+
+    public function testSkipWithCallable(): void
+    {
+        $event = $this->createEvent('php -v');
+        $result = $event->skip(function () {
+            return false;
+        });
+
+        $this->assertSame($event, $result);
+        $this->assertTrue($event->filtersPass());
+    }
+
+    public function testSkipWithCallableReturningTrue(): void
+    {
+        $event = $this->createEvent('php -v');
+        $event->skip(function () {
+            return true;
+        });
+
+        $this->assertFalse($event->filtersPass());
+    }
+
+    public function testSkipWithBooleanTrue(): void
+    {
+        $event = $this->createEvent('php -v');
+        $event->skip(true);
+
+        $this->assertFalse($event->filtersPass());
+    }
+
+    public function testSkipWithBooleanFalse(): void
+    {
+        $event = $this->createEvent('php -v');
+        $event->skip(false);
+
+        $this->assertTrue($event->filtersPass());
+    }
+
+    public function testBetweenTimeFilter(): void
+    {
+        Chronos::setTestNow('2024-01-01 09:00:00');
+
+        $event = $this->createEvent('php -v');
+        $event->between('08:00', '10:00');
+
+        $this->assertTrue($event->filtersPass());
+
+        Chronos::setTestNow();
+    }
+
+    public function testBetweenTimeFilterOutsideRange(): void
+    {
+        Chronos::setTestNow('2024-01-01 11:00:00');
+
+        $event = $this->createEvent('php -v');
+        $event->between('08:00', '10:00');
+
+        $this->assertFalse($event->filtersPass());
+
+        Chronos::setTestNow();
+    }
+
+    public function testBetweenTimeFilterWithOvernightRange(): void
+    {
+        Chronos::setTestNow('2024-01-01 23:00:00');
+
+        $event = $this->createEvent('php -v');
+        $event->between('22:00', '02:00');
+
+        $this->assertTrue($event->filtersPass());
+
+        Chronos::setTestNow();
+    }
+
+    public function testUnlessBetweenTimeFilter(): void
+    {
+        Chronos::setTestNow('2024-01-01 11:00:00');
+
+        $event = $this->createEvent('php -v');
+        $event->unlessBetween('08:00', '10:00');
+
+        $this->assertTrue($event->filtersPass());
+
+        Chronos::setTestNow();
+    }
+
+    public function testUnlessBetweenTimeFilterInsideRange(): void
+    {
+        Chronos::setTestNow('2024-01-01 09:00:00');
+
+        $event = $this->createEvent('php -v');
+        $event->unlessBetween('08:00', '10:00');
+
+        $this->assertFalse($event->filtersPass());
+
+        Chronos::setTestNow();
+    }
+
+    public function testEvenInMaintenanceMode(): void
+    {
+        $event = $this->createEvent('php -v');
+        $event->evenInMaintenanceMode();
+
+        $this->assertTrue($event->runsInMaintenanceMode());
+    }
+
+    public function testFiltersPassWithNoFilters(): void
+    {
+        $event = $this->createEvent('php -v');
+
+        $this->assertTrue($event->filtersPass());
+    }
+
+    public function testFiltersPassWithWhenAndSkip(): void
+    {
+        $event = $this->createEvent('php -v');
+        $event->when(function () {
+            return true;
+        });
+        $event->skip(function () {
+            return false;
+        });
+
+        $this->assertTrue($event->filtersPass());
+    }
+
+    public function testFiltersPassWithWhenAndSkipRejecting(): void
+    {
+        $event = $this->createEvent('php -v');
+        $event->when(function () {
+            return true;
+        });
+        $event->skip(function () {
+            return true;
+        });
+
+        $this->assertFalse($event->filtersPass());
+    }
+
+    public function testRunInBackground(): void
+    {
+        $event = $this->createEvent('php -v');
+        $result = $event->runInBackground();
+
+        $this->assertSame($event, $result);
+        $this->assertTrue($event->runInBackground);
+    }
+
+    public function testOnOneServer(): void
+    {
+        $event = $this->createEvent('php -v');
+        $result = $event->onOneServer();
+
+        $this->assertSame($event, $result);
+        $this->assertTrue($event->onOneServer);
+    }
+
+    public function testUserAttribute(): void
+    {
+        $event = $this->createEvent('php -v');
+        $event->user('testuser');
+
+        $this->assertEquals('testuser', $event->user);
+    }
+
+    public function testBetweenResolvesTimezoneAtFilterTime(): void
+    {
+        Chronos::setTestNow('2024-01-01 14:00:00');
+
+        $event = $this->createEvent('php -v');
+        $event->between('08:00', '10:00')->timezone('America/New_York');
+
+        $this->assertTrue($event->filtersPass());
+
+        Chronos::setTestNow();
+    }
+
+    public function testBuildCommandAsUserEscapesInnerCommand(): void
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $this->markTestSkipped('Unix-specific quoting');
+        }
+
+        $event = $this->createEvent("echo 'hello'");
+        $event->user = 'deploy';
+
+        $command = $event->buildCommand();
+
+        $this->assertStringContainsString("sudo -u deploy -- sh -c '", $command);
+        $this->assertStringNotContainsString("sh -c 'echo 'hello''", $command);
+    }
+
+    public function testSkippedBecauseOverlappingFlag(): void
+    {
+        $event = $this->createEvent('php -v');
+        $event->name('overlap-test')->withoutOverlapping();
+
+        $event->mutex->create($event);
+        $event->run();
+
+        $this->assertTrue($event->skippedBecauseOverlapping);
+    }
+
+    public function testBeforeCallbackReceivesTypedEvent(): void
+    {
+        $received = null;
+        $event = $this->createEvent('php -v');
+        $event->before(function (Event $scheduled) use (&$received): void {
+            $received = $scheduled;
+        });
+
+        $event->callBeforeCallbacks();
+
+        $this->assertSame($event, $received);
+    }
+
+    public function testOnSuccessCallbackRuns(): void
+    {
+        $called = false;
+        $event = $this->createEvent('php -v');
+        $event->exitCode = 0;
+        $event->onSuccess(function () use (&$called): void {
+            $called = true;
+        });
+        $event->callAfterCallbacks();
+
+        $this->assertTrue($called);
     }
 }

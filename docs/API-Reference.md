@@ -20,6 +20,9 @@ This document provides a comprehensive reference for all classes, methods, and i
   - [ScheduleRunCommand](#scheduleruncommand)
   - [ScheduleWorkCommand](#scheduleworkcommand)
   - [ScheduleListCommand](#schedulelistcommand)
+  - [SchedulePauseCommand](#schedulepausecommand)
+  - [ScheduleResumeCommand](#scheduleresumecommand)
+  - [ScheduleInterruptCommand](#scheduleinterruptcommand)
   - [ScheduleTestCommand](#scheduletestcommand)
   - [ScheduleClearCacheCommand](#scheduleclearcachecommand)
   - [ScheduleFinishCommand](#schedulefinishcommand)
@@ -53,6 +56,11 @@ The main scheduling class that manages all scheduled tasks.
 | `events()` | Get all events on the schedule |
 | `serverShouldRun(Event $event, DateTimeInterface $time)` | Determine if the server should run the given event |
 | `useCache(string $store)` | Specify the cache store for task coordination |
+| `pause()` | Pause scheduled task processing (cache flag) |
+| `resume()` | Resume scheduled task processing |
+| `interrupt()` | Broadcast an interrupt for the current schedule run |
+| `isPaused()` | Determine if the scheduler is paused |
+| `withoutInterruptionPolling()` | Disable pause/interrupt cache checks for this process |
 
 ### Dynamic Methods
 
@@ -106,6 +114,7 @@ Represents a scheduled task event.
 | `monthly()` | Run the task every month |
 | `monthlyOn(int $dayOfMonth = 1, string $time = '0:0')` | Run the task monthly on given day |
 | `twiceMonthly(int $first = 1, int $second = 16, string $time = '0:0')` | Run the task twice monthly |
+| `daysOfMonth(array|int ...$days)` | Run the task on specific days of the month (for example `daysOfMonth([1, 10, 20])` or `daysOfMonth(1, 10, 20)`) |
 | `lastDayOfMonth(string $time = '0:0')` | Run the task on the last day of the month |
 | `quarterly()` | Run the task every quarter |
 | `quarterlyOn(int $dayOfQuarter = 1, string $time = '0:0')` | Run the task quarterly on given day |
@@ -135,7 +144,8 @@ Represents a scheduled task event.
 | Method | Description |
 | --- | --- |
 | `name(string $name)` | Assign a name to the scheduled task |
-| `withoutOverlapping(int $expiresAt = 1440)` | Prevent the task from overlapping |
+| `withoutOverlapping(int $expiresAt = 1440, bool $releaseOnTerminationSignals = true)` | Prevent the task from overlapping |
+| `evenWhenPaused()` | Allow the task to run while the scheduler is paused |
 | `onOneServer()` | Ensure the task runs on only one server |
 | `runInBackground()` | Run the task in the background |
 | `when(callable $callback)` | Constrain the task based on a truth test |
@@ -217,7 +227,34 @@ bin/cake schedule work [options]
 List all scheduled tasks and their next run times.
 
 ```bash
-bin/cake schedule list
+bin/cake schedule list [--timezone=TIMEZONE]
+```
+
+**Options:**
+- `--timezone` - Display cron expressions and next-run times in this timezone
+
+### SchedulePauseCommand
+
+Pause scheduled task processing without changing deployed schedule definitions.
+
+```bash
+bin/cake schedule pause
+```
+
+### ScheduleResumeCommand
+
+Resume scheduled task processing after a pause.
+
+```bash
+bin/cake schedule resume
+```
+
+### ScheduleInterruptCommand
+
+Interrupt the current schedule run so sub-minute (repeatable) tasks stop for the remainder of the minute.
+
+```bash
+bin/cake schedule interrupt
 ```
 
 ### ScheduleTestCommand
@@ -292,10 +329,12 @@ The plugin dispatches the following events during task execution:
 
 | Event Name | Description |
 | --- | --- |
-| `Scheduling\Event\ScheduledTaskStarting` | Dispatched when a scheduled task is about to start |
-| `Scheduling\Event\ScheduledTaskFinished` | Dispatched when a scheduled task has finished |
-| `Scheduling\Event\ScheduledTaskSkipped` | Dispatched when a scheduled task is skipped |
-| `Scheduling\Event\ScheduledTaskFailed` | Dispatched when a scheduled task fails |
+| `Crustum\Scheduling\Event\ScheduledTaskStarting` | Dispatched when a scheduled task is about to start |
+| `Crustum\Scheduling\Event\ScheduledTaskFinished` | Dispatched when a scheduled task has finished |
+| `Crustum\Scheduling\Event\ScheduledTaskSkipped` | Dispatched when a scheduled task is skipped |
+| `Crustum\Scheduling\Event\ScheduledTaskFailed` | Dispatched when a scheduled task fails |
+| `Crustum\Scheduling\Event\SchedulePaused` | Dispatched when scheduled task processing is paused |
+| `Crustum\Scheduling\Event\ScheduleResumed` | Dispatched when scheduled task processing is resumed |
 
 ### Event Data
 

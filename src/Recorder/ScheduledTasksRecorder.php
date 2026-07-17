@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Recorder;
+namespace Crustum\Scheduling\Recorder;
 
 use Cake\Event\EventListenerInterface;
 use Cake\ORM\TableRegistry;
-use Rhythm\Event\SharedBeat;
-use Rhythm\Recorder\BaseRecorder;
-use Rhythm\Recorder\Trait\ThrottlingTrait;
+use Crustum\Rhythm\Event\SharedBeat;
+use Crustum\Rhythm\Recorder\BaseRecorder;
+use Crustum\Rhythm\Recorder\Trait\ThrottlingTrait;
 
 /**
  * Scheduled Tasks Recorder
@@ -54,8 +54,8 @@ class ScheduledTasksRecorder extends BaseRecorder implements EventListenerInterf
             $timestamp = $event->getTimestamp()->getTimestamp();
 
             try {
-                /** @var \Scheduling\Model\Table\MonitoredScheduledTasksTable $monitoredTasksTable */
-                $monitoredTasksTable = TableRegistry::getTableLocator()->get('Scheduling.MonitoredScheduledTasks');
+                /** @var \Crustum\Scheduling\Model\Table\MonitoredScheduledTasksTable $monitoredTasksTable */
+                $monitoredTasksTable = TableRegistry::getTableLocator()->get('Crustum/Scheduling.MonitoredScheduledTasks');
                 $stats = $monitoredTasksTable->getStatistics();
                 $taskDetails = $monitoredTasksTable->getAllTasksStatusInfo();
                 $this->rhythm->set(

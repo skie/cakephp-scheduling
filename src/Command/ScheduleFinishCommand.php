@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Command;
+namespace Crustum\Scheduling\Command;
 
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Scheduling\Event\ScheduledBackgroundTaskFinished;
+use Crustum\Scheduling\Event\ScheduledBackgroundTaskFinished;
 
 /**
  * Schedule Finish Command

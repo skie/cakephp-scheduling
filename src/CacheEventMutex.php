@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling;
+namespace Crustum\Scheduling;
 
 use Cake\Cache\Cache;
 
@@ -22,7 +22,7 @@ class CacheEventMutex implements EventMutexInterface, CacheAwareInterface
     /**
      * Attempt to obtain an event mutex for the given event.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @param int|null $customTtlSeconds Custom TTL in seconds (optional)
      * @return bool True if mutex was created successfully
      */
@@ -43,7 +43,7 @@ class CacheEventMutex implements EventMutexInterface, CacheAwareInterface
     /**
      * Determine if an event mutex exists for the given event.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @param int|null $customTtlSeconds Custom TTL in seconds (optional)
      * @return bool True if mutex exists and is still valid
      */
@@ -73,7 +73,7 @@ class CacheEventMutex implements EventMutexInterface, CacheAwareInterface
     /**
      * Clear the event mutex for the given event.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @return void
      */
     public function forget(Event $event): void

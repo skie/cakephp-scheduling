@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Test\TestCase;
+namespace Crustum\Scheduling\Test\TestCase;
 
 use Cake\Cache\Cache;
 use Cake\TestSuite\TestCase;
-use Scheduling\CacheEventMutex;
-use Scheduling\CacheEventMutex as Mutex;
-use Scheduling\Event;
+use Crustum\Scheduling\CacheEventMutex;
+use Crustum\Scheduling\CacheEventMutex as Mutex;
+use Crustum\Scheduling\Event;
 
 class CacheEventMutexTest extends TestCase
 {

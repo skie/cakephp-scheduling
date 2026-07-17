@@ -34,7 +34,7 @@ function getStatusClass($status): string
 $data = $widget->getData();
 $this->set('data', $data);
 
-$this->extend('Rhythm.widgets/widget_base');
+$this->extend('Crustum/Rhythm.widgets/widget_base');
 
 $this->start('widget_body');
 
@@ -42,7 +42,7 @@ $tasksData = $data['tasks'] ?? [];
 $summary = $data['summary'] ?? [];
 
 if (empty($tasksData)) {
-    echo $this->element('Rhythm.components/widget_placeholder', [
+    echo $this->element('Crustum/Rhythm.components/widget_placeholder', [
         'message' => 'No monitored scheduled tasks data available.'
     ]);
 } else {

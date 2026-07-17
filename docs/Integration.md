@@ -55,7 +55,7 @@ The recommended way to define scheduled tasks is using the event manager during 
 
 ```php
 use Cake\Event\EventManager;
-use Scheduling\Schedule;
+use Crustum\Scheduling\Schedule;
 
 $eventManager = EventManager::instance();
 $eventManager->on('Application.buildContainer', function ($event): void {
@@ -320,8 +320,8 @@ The plugin dispatches events during task execution that you can listen to:
 
 ```php
 use Cake\Event\EventManager;
-use Scheduling\Event\ScheduledTaskStarting;
-use Scheduling\Event\ScheduledTaskFinished;
+use Crustum\Scheduling\Event\ScheduledTaskStarting;
+use Crustum\Scheduling\Event\ScheduledTaskFinished;
 
 $eventManager = EventManager::instance();
 
@@ -561,17 +561,19 @@ The scheduler dispatches a variety of events during the scheduling process. You 
 
 | Event Name |
 | --- |
-| `Scheduling\Event\ScheduledTaskStarting` |
-| `Scheduling\Event\ScheduledTaskFinished` |
-| `Scheduling\Event\ScheduledTaskSkipped` |
-| `Scheduling\Event\ScheduledTaskFailed` |
+| `Crustum\Scheduling\Event\ScheduledTaskStarting` |
+| `Crustum\Scheduling\Event\ScheduledTaskFinished` |
+| `Crustum\Scheduling\Event\ScheduledTaskSkipped` |
+| `Crustum\Scheduling\Event\ScheduledTaskFailed` |
+| `Crustum\Scheduling\Event\SchedulePaused` |
+| `Crustum\Scheduling\Event\ScheduleResumed` |
 
 You may register event listeners for these events in your application's event manager:
 
 ```php
 use Cake\Event\EventManager;
-use Scheduling\Event\ScheduledTaskStarting;
-use Scheduling\Event\ScheduledTaskFinished;
+use Crustum\Scheduling\Event\ScheduledTaskStarting;
+use Crustum\Scheduling\Event\ScheduledTaskFinished;
 
 $eventManager = EventManager::instance();
 

@@ -4,4 +4,4 @@ declare(strict_types=1);
 
 use Cake\Core\Configure;
 
-Configure::load('Scheduling.scheduling');
+Configure::load('Crustum/Scheduling.scheduling');

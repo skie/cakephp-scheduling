@@ -43,6 +43,7 @@ use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Cake\Error\ErrorTrap;
+use Cake\TestSuite\Fixture\SchemaLoader;
 
 Configure::write('App', ['namespace' => 'TestApp']);
 Configure::write('debug', true);
@@ -104,6 +105,9 @@ ConnectionManager::setConfig('test', [
 ]);
 
 ConnectionManager::alias('test', 'default');
+
+$loader = new SchemaLoader();
+$loader->loadInternalFile(TESTS . 'schema.php');
 
 $error = [
     'errorLevel' => E_ALL,

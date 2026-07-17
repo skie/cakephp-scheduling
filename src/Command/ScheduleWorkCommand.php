@@ -1,13 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Command;
+namespace Crustum\Scheduling\Command;
 
 use Cake\Chronos\Chronos;
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Scheduling\Service\ScheduleMonitorService;
+use Crustum\Scheduling\Schedule;
+use Crustum\Scheduling\Service\ScheduleMonitorService;
 use SignalHandler\Command\Trait\SignalHandlerTrait;
 
 /**
@@ -109,7 +110,7 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
         $lastExecutionStartedAt = \Cake\Chronos\Chronos::now()->subMinutes(10);
 
         while ($this->isRunning) {
-            usleep(100 * 1000);
+            usleep(100_000);
 
             $now = \Cake\Chronos\Chronos::now();
 
@@ -163,6 +164,18 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
         $schedule = $this->getSchedule();
         $dueEvents = $schedule->dueEvents();
 
+        $hasRepeatable = false;
+        foreach ($dueEvents as $event) {
+            if ($event->isRepeatable()) {
+                $hasRepeatable = true;
+                break;
+            }
+        }
+
+        if ($hasRepeatable) {
+            Schedule::clearInterruptSignal();
+        }
+
         if (empty($dueEvents)) {
             if ($verbose) {
                 $io->info('No scheduled events are due to run.');
@@ -176,9 +189,17 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
         }
 
         $startedAt = microtime(true);
+        $paused = Schedule::isPaused();
 
         foreach ($dueEvents as $event) {
             if ($event->isRepeatable()) {
+                continue;
+            }
+
+            if ($paused && !$event->runsWhenPaused()) {
+                if ($verbose) {
+                    $io->info(sprintf('Skipping [%s] - scheduler is paused.', $event->getSummaryForDisplay()));
+                }
                 continue;
             }
 
@@ -191,7 +212,7 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
 
             if ($event->onOneServer && !$schedule->serverShouldRun($event, Chronos::now())) {
                 if ($verbose) {
-                    $io->info(sprintf('Skipping [%s] - already running on another server.', $event->getSummaryForDisplay()));
+                    $io->info(sprintf('Skipping [%s] because the command already ran on another server.', $event->getSummaryForDisplay()));
                 }
                 continue;
             }
@@ -221,15 +242,20 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
     /**
      * Run repeatable events in a tight loop for the rest of the minute.
      *
-     * @param array<\Scheduling\Event> $events The repeatable events
+     * @param array<\Crustum\Scheduling\Event> $events The repeatable events
      * @param \Cake\Console\ConsoleIo $io The console io
      * @param bool $verbose Whether to show verbose output
      * @return void
      */
     protected function repeatEvents(array $events, ConsoleIo $io, bool $verbose): void
     {
-        $startedAt = \Cake\Chronos\Chronos::now();
-        $endOfMinute = $startedAt->modify('59 seconds');
+        $startedAt = Chronos::now();
+        $endOfMinute = $startedAt->setTime(
+            (int)$startedAt->hour,
+            (int)$startedAt->minute,
+            59,
+            999999
+        );
 
         if ($verbose) {
             $io->info(sprintf(
@@ -245,28 +271,28 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
             }
         }
 
-        while ($this->isRunning && \Cake\Chronos\Chronos::now()->lessThanOrEquals($endOfMinute)) {
-            foreach ($events as $event) {
-                if (!$this->isRunning) {
-                    break;
-                }
+        while ($this->isRunning && Chronos::now()->lessThanOrEquals($endOfMinute)) {
+            $paused = Schedule::isPaused();
 
-                if ($verbose) {
-                    $io->info(sprintf('Checking if %s should repeat now...', $event->getSummaryForDisplay()));
+            foreach ($events as $event) {
+                if (!$this->isRunning || Schedule::shouldInterrupt()) {
+                    return;
                 }
 
                 if (!$event->shouldRepeatNow()) {
-                    if ($verbose) {
-                        $io->info('  -> Not ready to repeat yet');
-                    }
                     continue;
                 }
 
-                if ($verbose) {
-                    $io->info('  -> Ready to repeat! Running...');
+                if (Chronos::now()->greaterThan($endOfMinute)) {
+                    return;
+                }
+
+                if ($paused && !$event->runsWhenPaused()) {
+                    continue;
                 }
 
                 if ($event->shouldSkipDueToOverlapping()) {
+                    $event->skippedBecauseOverlapping = true;
                     if ($verbose) {
                         $io->info(sprintf('Skipping repeatable [%s] - overlapping execution.', $event->getSummaryForDisplay()));
                     }
@@ -284,7 +310,7 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
                     $schedule = $this->getSchedule();
                     if (!$schedule->serverShouldRun($event, Chronos::now())) {
                         if ($verbose) {
-                            $io->info(sprintf('Skipping repeatable [%s] - already running on another server.', $event->getSummaryForDisplay()));
+                            $io->info(sprintf('Skipping repeatable [%s] because the command already ran on another server.', $event->getSummaryForDisplay()));
                         }
                         continue;
                     }
@@ -297,11 +323,11 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
                 break;
             }
 
-            usleep(100 * 1000);
+            usleep(100_000);
         }
 
         if ($verbose) {
-            $runtime = round((microtime(true) - (float)$startedAt->timestamp) * 1000.0, 2);
+            $runtime = round((microtime(true) - (float)$startedAt->getTimestamp()) * 1000.0, 2);
             $io->info(sprintf('Repeatable events loop completed in %sms.', $runtime));
         }
     }
@@ -309,7 +335,7 @@ class ScheduleWorkCommand extends BaseSchedulerCommand
     /**
      * Run a single scheduled event.
      *
-     * @param \Scheduling\Event $event The event to run
+     * @param \Crustum\Scheduling\Event $event The event to run
      * @param \Cake\Console\ConsoleIo $io The console io
      * @param bool $verbose Whether to show verbose output
      * @return void

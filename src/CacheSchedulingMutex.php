@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling;
+namespace Crustum\Scheduling;
 
 use Cake\Cache\Cache;
 use DateTimeInterface;
@@ -23,7 +23,7 @@ class CacheSchedulingMutex implements SchedulingMutexInterface, CacheAwareInterf
     /**
      * Attempt to obtain a scheduling mutex for the given event.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @param \DateTimeInterface $time The time
      * @return bool True if mutex was created successfully
      */
@@ -41,7 +41,7 @@ class CacheSchedulingMutex implements SchedulingMutexInterface, CacheAwareInterf
     /**
      * Determine if a scheduling mutex exists for the given event.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @param \DateTimeInterface $time The time
      * @return bool True if mutex exists and is still valid
      */

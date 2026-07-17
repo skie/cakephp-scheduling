@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling;
+namespace Crustum\Scheduling;
 
 use DateTimeInterface;
 
@@ -15,7 +15,7 @@ interface SchedulingMutexInterface
     /**
      * Attempt to obtain a scheduling mutex for the given event.
      *
-     * @param \Scheduling\Event $event The event to create mutex for
+     * @param \Crustum\Scheduling\Event $event The event to create mutex for
      * @param \DateTimeInterface $time The time to create mutex for
      * @return bool True if mutex was created successfully
      */
@@ -24,7 +24,7 @@ interface SchedulingMutexInterface
     /**
      * Determine if a scheduling mutex exists for the given event.
      *
-     * @param \Scheduling\Event $event The event to check
+     * @param \Crustum\Scheduling\Event $event The event to check
      * @param \DateTimeInterface $time The time to check
      * @return bool True if mutex exists
      */

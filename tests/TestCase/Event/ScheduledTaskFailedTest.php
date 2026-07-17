@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Test\TestCase\Event;
+namespace Crustum\Scheduling\Test\TestCase\Event;
 
 use Cake\TestSuite\TestCase;
-use Scheduling\CacheEventMutex;
-use Scheduling\Command\BaseSchedulerCommand;
-use Scheduling\Event;
-use Scheduling\Event\ScheduledTaskFailed;
+use Crustum\Scheduling\CacheEventMutex;
+use Crustum\Scheduling\Command\BaseSchedulerCommand;
+use Crustum\Scheduling\Event;
+use Crustum\Scheduling\Event\ScheduledTaskFailed;
 
 class ScheduledTaskFailedTest extends TestCase
 {

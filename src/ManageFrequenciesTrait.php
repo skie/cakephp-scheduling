@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling;
+namespace Crustum\Scheduling;
 
 use Cake\Chronos\Chronos;
 use InvalidArgumentException;
@@ -59,20 +59,28 @@ trait ManageFrequenciesTrait
      */
     private function inTimeInterval(string $startTime, string $endTime): callable
     {
-        $timezone = $this->timezone;
-        $now = Chronos::now($timezone);
-        $startTime = Chronos::parse($startTime, $timezone);
-        $endTime = Chronos::parse($endTime, $timezone);
+        $now = Chronos::now();
 
-        if ($endTime->lessThan($startTime)) {
-            if ($startTime->greaterThan($now)) {
-                $startTime = $startTime->subDays(1);
-            } else {
-                $endTime = $endTime->addDays(1);
+        return function () use ($startTime, $endTime, $now) {
+            $current = $now;
+
+            if ($this->timezone) {
+                $current = $current->setTimezone($this->timezone);
             }
-        }
 
-        return fn() => $now->between($startTime, $endTime);
+            $start = Chronos::parse($startTime, $this->timezone);
+            $end = Chronos::parse($endTime, $this->timezone);
+
+            if ($end->lessThan($start)) {
+                if ($start->greaterThan($current)) {
+                    $start = $start->subDays(1);
+                } else {
+                    $end = $end->addDays(1);
+                }
+            }
+
+            return $current->between($start, $end);
+        };
     }
 
     /**
@@ -148,12 +156,16 @@ trait ManageFrequenciesTrait
     /**
      * Schedule the event to run multiple times per minute.
      *
-     * @param int $seconds The seconds interval (0-59)
+     * @param int $seconds The seconds interval (must be 1-59 and divide 60 evenly)
      * @return $this
      * @throws \InvalidArgumentException
      */
     protected function repeatEvery(int $seconds)
     {
+        if ($seconds <= 0) {
+            throw new InvalidArgumentException("The seconds [{$seconds}] must be greater than zero.");
+        }
+
         if (60 % $seconds !== 0) {
             throw new InvalidArgumentException("The seconds [{$seconds}] are not evenly divisible by 60.");
         }
@@ -569,6 +581,31 @@ trait ManageFrequenciesTrait
         $this->dailyAt($time);
 
         return $this->spliceIntoPosition(3, Chronos::now()->endOfMonth()->day);
+    }
+
+    /**
+     * Schedule the event to run on specific days of the month.
+     *
+     * @param array<int, int>|int ...$days Days of the month (1-31), or a single array of days
+     * @return $this
+     */
+    public function daysOfMonth(array|int ...$days)
+    {
+        if (count($days) === 1 && is_array($days[0])) {
+            $normalizedDays = $days[0];
+        } else {
+            $normalizedDays = [];
+            foreach ($days as $day) {
+                if (!is_int($day)) {
+                    throw new InvalidArgumentException('daysOfMonth() expects int days or a single int array.');
+                }
+                $normalizedDays[] = $day;
+            }
+        }
+
+        $this->dailyAt('0:0');
+
+        return $this->spliceIntoPosition(3, implode(',', $normalizedDays));
     }
 
     /**

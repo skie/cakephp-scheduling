@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Command;
+namespace Crustum\Scheduling\Command;
 
 use Cake\Cache\Cache;
 use Cake\Console\Arguments;

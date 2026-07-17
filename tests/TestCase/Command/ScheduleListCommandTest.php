@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Test\TestCase\Command;
+namespace Crustum\Scheduling\Test\TestCase\Command;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Configure;
 use Cake\TestSuite\TestCase;
-use Scheduling\Schedule;
+use Crustum\Scheduling\Schedule;
 
 class ScheduleListCommandTest extends TestCase
 {
@@ -69,5 +69,45 @@ class ScheduleListCommandTest extends TestCase
 
         $this->assertExitSuccess();
         $this->assertOutputContains('Test command');
+    }
+
+    public function testListConvertsExpressionToDisplayTimezone(): void
+    {
+        \Cake\Chronos\Chronos::setTestNow('2026-01-15 12:00:00');
+
+        $schedule = new Schedule();
+        $schedule->command('echo "daily"')->dailyAt('08:00')->timezone('America/Los_Angeles');
+
+        $this->mockService(Schedule::class, function () use ($schedule) {
+            return $schedule;
+        });
+
+        $this->exec('schedule list --timezone=UTC');
+
+        $this->assertExitSuccess();
+        $this->assertOutputContains('0 16 * * *');
+
+        \Cake\Chronos\Chronos::setTestNow();
+    }
+
+    public function testListSplitsExpressionWhenMixedCarry(): void
+    {
+        \Cake\Chronos\Chronos::setTestNow('2026-01-15 12:00:00');
+
+        $schedule = new Schedule();
+        $schedule->command('echo "twice"')->twiceDaily(13, 17)->timezone('America/Los_Angeles');
+
+        $this->mockService(Schedule::class, function () use ($schedule) {
+            return $schedule;
+        });
+
+        $this->exec('schedule list --timezone=UTC');
+
+        $this->assertExitSuccess();
+        $this->assertOutputContains('0 21 * * *');
+        $this->assertOutputContains('0 1 * * *');
+        $this->assertOutputContains('Found 1 scheduled event(s)');
+
+        \Cake\Chronos\Chronos::setTestNow();
     }
 }

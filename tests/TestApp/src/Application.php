@@ -12,7 +12,7 @@ class Application extends BaseApplication
     public function bootstrap(): void
     {
         parent::bootstrap();
-        $this->addPlugin('Scheduling');
+        $this->addPlugin('Crustum/Scheduling');
     }
 
     public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue

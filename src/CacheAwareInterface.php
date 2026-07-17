@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling;
+namespace Crustum\Scheduling;
 
 /**
  * Cache Aware Interface

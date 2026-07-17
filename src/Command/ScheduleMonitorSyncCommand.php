@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Command;
+namespace Crustum\Scheduling\Command;
 
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
-use Scheduling\Service\ScheduleMonitorService;
+use Crustum\Scheduling\Service\ScheduleMonitorService;
 
 /**
  * Schedule Monitor Sync Command

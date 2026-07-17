@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Test\TestCase;
+namespace Crustum\Scheduling\Test\TestCase;
 
 use Cake\TestSuite\TestCase;
-use Scheduling\CacheEventMutex;
-use Scheduling\Event;
+use Crustum\Scheduling\CacheEventMutex;
+use Crustum\Scheduling\Event;
 
 class FrequencyTest extends TestCase
 {
@@ -130,6 +130,27 @@ class FrequencyTest extends TestCase
     public function testTwiceMonthly(): void
     {
         $this->assertSame('0 0 1,16 * *', $this->event->twiceMonthly(1, 16)->getExpression());
+    }
+
+    public function testDaysOfMonth(): void
+    {
+        $this->assertSame('0 0 1,15 * *', $this->event->daysOfMonth(1, 15)->getExpression());
+    }
+
+    public function testDaysOfMonthWithArray(): void
+    {
+        $this->assertSame('0 0 1,15,28 * *', $this->event->daysOfMonth([1, 15, 28])->getExpression());
+    }
+
+    public function testEverySecondRejectsNonPositiveSeconds(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('must be greater than zero');
+
+        $reflection = new \ReflectionClass($this->event);
+        $method = $reflection->getMethod('repeatEvery');
+        $method->setAccessible(true);
+        $method->invoke($this->event, 0);
     }
 
     public function testTwiceMonthlyAtTime(): void

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling;
+namespace Crustum\Scheduling;
 
 /**
  * Scheduling Monitor
@@ -17,6 +17,11 @@ class SchedulingMonitor
     public const EVENT_TYPE_CAKE_COMMAND = 'cake_command';
     public const EVENT_TYPE_EXEC = 'exec';
     public const EVENT_TYPE_UNKNOWN = 'unknown-event';
+
+    /**
+     * Maximum length for monitored task names (matches DB column / validation).
+     */
+    public const MAX_NAME_LENGTH = 255;
 
     /**
      * Get the CakePHP command prefix for the current OS.
@@ -71,7 +76,7 @@ class SchedulingMonitor
      */
     public static function getEventType($event, ?string $command): string
     {
-        if ($event instanceof \Scheduling\CallbackEvent) {
+        if ($event instanceof \Crustum\Scheduling\CallbackEvent) {
             return self::EVENT_TYPE_CALLBACK;
         }
 
@@ -85,28 +90,45 @@ class SchedulingMonitor
     /**
      * Generate a name for the event.
      *
-     * @param \Scheduling\Event $event The schedule event
+     * Names are truncated to fit the monitored_scheduled_tasks.name column.
+     *
+     * @param \Crustum\Scheduling\Event $event The schedule event
      * @param string|null $command The command string
      * @return string
      */
     public static function generateEventName($event, ?string $command): string
     {
         if (!empty($event->getMonitorName())) {
-            return $event->getMonitorName();
+            return self::limitMonitorName($event->getMonitorName());
         }
 
         if (!empty($event->getDescription())) {
-            return $event->getDescription();
+            return self::limitMonitorName($event->getDescription());
         }
 
         if (empty($command)) {
-            if ($event instanceof \Scheduling\CallbackEvent) {
-                return self::EVENT_TYPE_CALLBACK . '-' . uniqid();
+            if ($event instanceof \Crustum\Scheduling\CallbackEvent) {
+                return self::limitMonitorName(self::EVENT_TYPE_CALLBACK . '-' . uniqid());
             }
 
             return self::EVENT_TYPE_UNKNOWN;
         }
 
-        return self::generateNameFromCommand($command);
+        return self::limitMonitorName(self::generateNameFromCommand($command));
+    }
+
+    /**
+     * Truncate a monitor name to the database column width without ellipsis.
+     *
+     * @param string $name The monitor name
+     * @return string
+     */
+    public static function limitMonitorName(string $name): string
+    {
+        if (mb_strlen($name) <= self::MAX_NAME_LENGTH) {
+            return $name;
+        }
+
+        return mb_substr($name, 0, self::MAX_NAME_LENGTH);
     }
 }

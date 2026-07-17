@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling;
+namespace Crustum\Scheduling;
 
 /**
  * Event Mutex Interface
@@ -13,7 +13,7 @@ interface EventMutexInterface
     /**
      * Attempt to obtain an event mutex for the given event.
      *
-     * @param \Scheduling\Event $event The event to create mutex for
+     * @param \Crustum\Scheduling\Event $event The event to create mutex for
      * @param int|null $customTtlSeconds Custom TTL in seconds (optional)
      * @return bool True if mutex was created successfully
      */
@@ -22,7 +22,7 @@ interface EventMutexInterface
     /**
      * Determine if an event mutex exists for the given event.
      *
-     * @param \Scheduling\Event $event The event to check
+     * @param \Crustum\Scheduling\Event $event The event to check
      * @param int|null $customTtlSeconds Custom TTL in seconds (optional)
      * @return bool True if mutex exists
      */
@@ -31,7 +31,7 @@ interface EventMutexInterface
     /**
      * Clear the event mutex for the given event.
      *
-     * @param \Scheduling\Event $event The event to clear mutex for
+     * @param \Crustum\Scheduling\Event $event The event to clear mutex for
      * @return void
      */
     public function forget(Event $event): void;

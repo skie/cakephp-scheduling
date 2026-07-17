@@ -16,6 +16,7 @@
 - [Running the Scheduler](#running-the-scheduler)
     - [Sub-Minute Scheduled Tasks](#sub-minute-scheduled-tasks)
     - [Running the Scheduler Locally](#running-the-scheduler-locally)
+    - [Pausing Scheduled Tasks](#pausing-scheduled-tasks)
 - [Monitoring](#monitoring)
 - [Task Output](Integration.md#task-output)
 - [Task Hooks](Integration.md#task-hooks)
@@ -37,7 +38,7 @@ You may define all of your scheduled tasks using CakePHP's event manager during 
 
 ```php
 use Cake\Event\EventManager;
-use Scheduling\Schedule;
+use Crustum\Scheduling\Schedule;
 
 $eventManager = EventManager::instance();
 $eventManager->on('Application.buildContainer', function ($event): void {
@@ -252,6 +253,34 @@ Typically, you would not add a scheduler cron entry to your local development ma
 bin/cake schedule work
 ```
 
+<a name="pausing-scheduled-tasks"></a>
+### Pausing Scheduled Tasks
+
+You may temporarily pause scheduled task processing without changing your deployed code by using the `schedule pause` console command:
+
+```shell
+bin/cake schedule pause
+```
+
+While the scheduler is paused, no scheduled tasks will run. You may resume scheduled task processing using the `schedule resume` command:
+
+```shell
+bin/cake schedule resume
+```
+
+If a task should still run while the scheduler is paused, you may mark it with the `evenWhenPaused` method:
+
+```php
+$schedule->command('emails send')->evenWhenPaused();
+```
+
+To stop an in-progress `schedule run` that is processing sub-minute (repeatable) tasks for the rest of the current minute, you may broadcast an interrupt signal:
+
+```shell
+bin/cake schedule interrupt
+```
+
+<a name="monitoring"></a>
 ## Monitoring
 
 The Scheduling plugin includes comprehensive monitoring capabilities to track task execution, performance, and status.
@@ -325,7 +354,7 @@ To enable the Scheduled Tasks widget, add the recorder and widget configuration 
 'Rhythm' => [
     'recorders' => [
         'Scheduling.scheduled_tasks' => [
-            'className' => \Scheduling\Recorder\ScheduledTasksRecorder::class,
+            'className' => \Crustum\Scheduling\Recorder\ScheduledTasksRecorder::class,
             'enabled' => true,
             'sample_rate' => 1.0,
             'throttle_seconds' => 15,
@@ -333,7 +362,7 @@ To enable the Scheduled Tasks widget, add the recorder and widget configuration 
     ],
     'widgets' => [
         'Scheduling.scheduled_tasks' => [
-            'className' => \Scheduling\Widget\ScheduledTasksWidget::class,
+            'className' => \Crustum\Scheduling\Widget\ScheduledTasksWidget::class,
             'name' => 'Scheduled Tasks',
             'cols' => ['default' => 12, 'lg' => 12],
             'refreshInterval' => 15,

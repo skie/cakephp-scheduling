@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling;
+namespace Crustum\Scheduling;
 
 /**
  * Pending Event Attributes
@@ -12,6 +12,19 @@ class PendingEventAttributes
 {
     use ManageAttributesTrait;
     use ManageFrequenciesTrait;
+
+    /**
+     * Event lifecycle and output methods that should be deferred and replayed on each event in the group.
+     *
+     * @var array<int, string>
+     */
+    public const DEFERRED_EVENT_METHODS = [
+        'before',
+        'after',
+        'then',
+        'onSuccess',
+        'onFailure',
+    ];
 
     /**
      * The output location for the command.
@@ -28,9 +41,16 @@ class PendingEventAttributes
     public bool $shouldAppendOutput = false;
 
     /**
+     * The recorded deferred method calls to replay on each event.
+     *
+     * @var array<int, array{0: string, 1: array<mixed>}>
+     */
+    protected array $macros = [];
+
+    /**
      * Create a new pending event attributes instance.
      *
-     * @param \Scheduling\Schedule $schedule The schedule instance
+     * @param \Crustum\Scheduling\Schedule $schedule The schedule instance
      */
     public function __construct(
         protected Schedule $schedule,
@@ -42,12 +62,14 @@ class PendingEventAttributes
      * The expiration time of the underlying cache lock may be specified in minutes.
      *
      * @param int $expiresAt The expiration time in minutes
+     * @param bool $releaseOnTerminationSignals Whether to release the mutex on termination signals
      * @return $this
      */
-    public function withoutOverlapping(int $expiresAt = 1440)
+    public function withoutOverlapping(int $expiresAt = 1440, bool $releaseOnTerminationSignals = true)
     {
         $this->withoutOverlapping = true;
         $this->expiresAt = $expiresAt;
+        $this->releaseOnTerminationSignals = $releaseOnTerminationSignals;
 
         return $this;
     }
@@ -55,7 +77,7 @@ class PendingEventAttributes
     /**
      * Merge the current attributes into the given event.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @return void
      */
     public function mergeAttributes(Event $event): void
@@ -79,8 +101,12 @@ class PendingEventAttributes
             $event->evenInMaintenanceMode();
         }
 
+        if ($this->evenWhenPaused) {
+            $event->evenWhenPaused();
+        }
+
         if ($this->withoutOverlapping) {
-            $event->withoutOverlapping($this->expiresAt);
+            $event->withoutOverlapping($this->expiresAt, $this->releaseOnTerminationSignals);
         }
 
         if ($this->onOneServer) {
@@ -91,12 +117,20 @@ class PendingEventAttributes
             $event->runInBackground();
         }
 
+        if ($this->output !== null) {
+            $event->sendOutputTo($this->output, $this->shouldAppendOutput);
+        }
+
         foreach ($this->filters as $filter) {
             $event->when($filter);
         }
 
         foreach ($this->rejects as $reject) {
             $event->skip($reject);
+        }
+
+        foreach ($this->macros as [$method, $parameters]) {
+            $event->{$method}(...$parameters);
         }
     }
 
@@ -109,6 +143,12 @@ class PendingEventAttributes
      */
     public function __call(string $method, array $parameters): mixed
     {
+        if (in_array($method, static::DEFERRED_EVENT_METHODS, true)) {
+            $this->macros[] = [$method, $parameters];
+
+            return $this;
+        }
+
         return $this->schedule->{$method}(...$parameters);
     }
 }

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Command;
+namespace Crustum\Scheduling\Command;
 
 use Cake\Command\Command;
 use Cake\Console\Arguments;
@@ -42,8 +42,8 @@ class ScheduleMonitorPruneCommand extends Command
         $days = $args->getOption('days');
         $days = is_numeric($days) ? (int)$days : null;
 
-        /** @var \Scheduling\Model\Table\MonitoredScheduledTaskLogItemsTable $LogItems */
-        $LogItems = TableRegistry::getTableLocator()->get('Scheduling.MonitoredScheduledTaskLogItems');
+        /** @var \Crustum\Scheduling\Model\Table\MonitoredScheduledTaskLogItemsTable $LogItems */
+        $LogItems = TableRegistry::getTableLocator()->get('Crustum/Scheduling.MonitoredScheduledTaskLogItems');
         $deleted = $LogItems->cleanupOldItems($days);
 
         $io->out("Pruned {$deleted} log items older than {$days} days.");

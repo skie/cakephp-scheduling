@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling;
+namespace Crustum\Scheduling;
 
 /**
  * Manage Attributes Trait
@@ -46,11 +46,25 @@ trait ManageAttributesTrait
     public bool $evenInMaintenanceMode = false;
 
     /**
+     * Indicates if the command should run when the scheduler is paused.
+     *
+     * @var bool
+     */
+    public bool $evenWhenPaused = false;
+
+    /**
      * Indicates if the command should not overlap itself.
      *
      * @var bool
      */
     public bool $withoutOverlapping = false;
+
+    /**
+     * Indicates if the mutex should be released on termination signals.
+     *
+     * @var bool
+     */
+    public bool $releaseOnTerminationSignals = true;
 
     /**
      * Indicates if the command should only be allowed to run on one server for each cron expression.
@@ -148,16 +162,30 @@ trait ManageAttributesTrait
     }
 
     /**
+     * State that the command should run even when the scheduler is paused.
+     *
+     * @return $this
+     */
+    public function evenWhenPaused()
+    {
+        $this->evenWhenPaused = true;
+
+        return $this;
+    }
+
+    /**
      * Do not allow the event to overlap each other.
      * The expiration time of the underlying cache lock may be specified in minutes.
      *
      * @param int $expiresAt The expiration time in minutes
+     * @param bool $releaseOnTerminationSignals Whether to release the mutex on termination signals
      * @return $this
      */
-    public function withoutOverlapping(int $expiresAt = 1440)
+    public function withoutOverlapping(int $expiresAt = 1440, bool $releaseOnTerminationSignals = true)
     {
         $this->withoutOverlapping = true;
         $this->expiresAt = $expiresAt;
+        $this->releaseOnTerminationSignals = $releaseOnTerminationSignals;
 
         return $this->skip(function () {
             $customTtlSeconds = null;

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Command;
+namespace Crustum\Scheduling\Command;
 
 use Cake\Command\Command;
 use Cake\Console\CommandFactoryInterface;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
-use Scheduling\Schedule;
+use Crustum\Scheduling\Schedule;
 
 /**
  * Base Scheduler Command
@@ -19,14 +19,14 @@ abstract class BaseSchedulerCommand extends Command
     /**
      * Schedule instance.
      *
-     * @var \Scheduling\Schedule
+     * @var \Crustum\Scheduling\Schedule
      */
     protected Schedule $schedule;
 
     /**
      * Constructor.
      *
-     * @param \Scheduling\Schedule $schedule The schedule instance
+     * @param \Crustum\Scheduling\Schedule $schedule The schedule instance
      * @param \Cake\Console\CommandFactoryInterface $commandFactory The command factory
      */
     public function __construct(Schedule $schedule, CommandFactoryInterface $commandFactory)
@@ -38,7 +38,7 @@ abstract class BaseSchedulerCommand extends Command
     /**
      * Get the schedule instance.
      *
-     * @return \Scheduling\Schedule
+     * @return \Crustum\Scheduling\Schedule
      */
     protected function getSchedule(): Schedule
     {

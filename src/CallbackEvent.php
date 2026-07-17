@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling;
+namespace Crustum\Scheduling;
 
 use InvalidArgumentException;
 use LogicException;
@@ -46,7 +46,7 @@ class CallbackEvent extends Event
     /**
      * Create a new event instance.
      *
-     * @param \Scheduling\EventMutexInterface $mutex The mutex implementation
+     * @param \Crustum\Scheduling\EventMutexInterface $mutex The mutex implementation
      * @param mixed $callback The callback
      * @param array<mixed> $parameters The parameters
      * @param \DateTimeZone|string|null $timezone The timezone
@@ -135,10 +135,11 @@ class CallbackEvent extends Event
      * The expiration time of the underlying cache lock may be specified in minutes.
      *
      * @param int $expiresAt The expiration time in minutes
+     * @param bool $releaseOnTerminationSignals Whether to release the mutex on termination signals
      * @return $this
      * @throws \LogicException
      */
-    public function withoutOverlapping(int $expiresAt = 1440)
+    public function withoutOverlapping(int $expiresAt = 1440, bool $releaseOnTerminationSignals = true)
     {
         if (!isset($this->description)) {
             throw new LogicException(
@@ -146,7 +147,7 @@ class CallbackEvent extends Event
             );
         }
 
-        return parent::withoutOverlapping($expiresAt);
+        return parent::withoutOverlapping($expiresAt, $releaseOnTerminationSignals);
     }
 
     /**

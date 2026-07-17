@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Widget;
+namespace Crustum\Scheduling\Widget;
 
+use Crustum\Rhythm\Widget\BaseWidget;
 use Exception;
-use Rhythm\Widget\BaseWidget;
 
 /**
  * Scheduled Tasks Widget
@@ -87,7 +87,7 @@ class ScheduledTasksWidget extends BaseWidget
      */
     public function getTemplate(): string
     {
-        return 'Scheduling.widgets/scheduled_tasks';
+        return 'Crustum/Scheduling.widgets/scheduled_tasks';
     }
 
     /**

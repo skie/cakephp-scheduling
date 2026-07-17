@@ -3,7 +3,7 @@
 ## Composer
 
 ```
-composer require skie/cakephp-scheduling
+composer require crustum/cakephp-scheduling
 ```
 
 ## Load the Plugin
@@ -11,7 +11,7 @@ composer require skie/cakephp-scheduling
 Ensure the Scheduling Plugin is loaded in your src/Application.php file
 
 ```
-$this->addPlugin(\Scheduling\Plugin::class);
+$this->addPlugin(\Crustum\Scheduling\SchedulingPlugin::class);
 ```
 
 ## Load SignalHandler Plugin (Required)
@@ -19,7 +19,7 @@ $this->addPlugin(\Scheduling\Plugin::class);
 The Scheduling plugin requires the SignalHandler plugin for graceful termination support:
 
 ```
-$this->addPlugin(\SignalHandler\Plugin::class);
+$this->addPlugin(\SignalHandler\SignalHandlerPlugin::class);
 ```
 
 The plugin automatically registers the scheduling services and integrates with CakePHP's console system and event manager. No additional configuration is required for basic scheduling functionality.
@@ -29,7 +29,7 @@ The plugin automatically registers the scheduling services and integrates with C
 If you plan to use the monitoring features, run the database migrations to create the required tables:
 
 ```bash
-bin/cake migrations migrate -p Scheduling
+bin/cake migrations migrate -p Crustum/Scheduling
 ```
 
 This will create the following tables:
@@ -93,6 +93,9 @@ You should see the following scheduling commands available:
 * `schedule run` - Run scheduled tasks (typically called by cron)
 * `schedule work` - Run the scheduler continuously for development
 * `schedule list` - List all scheduled tasks
+* `schedule pause` - Pause scheduled task processing
+* `schedule resume` - Resume scheduled task processing after a pause
+* `schedule interrupt` - Interrupt the current schedule run (sub-minute loop)
 * `schedule test` - Test scheduled task execution
 * `schedule finish` - Finish a scheduled task execution
 * `schedule clear` - Clear scheduling cache

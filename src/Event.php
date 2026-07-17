@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling;
+namespace Crustum\Scheduling;
 
 use Cake\Chronos\Chronos;
 use Cake\Event\Event as CakeEvent;
@@ -73,7 +73,7 @@ class Event
     /**
      * The event mutex implementation.
      *
-     * @var \Scheduling\EventMutexInterface
+     * @var \Crustum\Scheduling\EventMutexInterface
      */
     public EventMutexInterface $mutex;
 
@@ -93,9 +93,16 @@ class Event
     public ?int $exitCode = null;
 
     /**
+     * Indicates whether the event was skipped because of overlapping.
+     *
+     * @var bool
+     */
+    public bool $skippedBecauseOverlapping = false;
+
+    /**
      * Create a new event instance.
      *
-     * @param \Scheduling\EventMutexInterface $mutex The mutex implementation
+     * @param \Crustum\Scheduling\EventMutexInterface $mutex The mutex implementation
      * @param string $command The command to execute
      * @param \DateTimeZone|string|null $timezone The timezone
      */
@@ -126,11 +133,16 @@ class Event
      */
     public function run(): void
     {
+        $this->skippedBecauseOverlapping = false;
+
         if ($this->shouldSkipDueToOverlapping()) {
-            $this->dispatchSchedulerEvent(new \Scheduling\Event\ScheduledTaskSkipped($this));
+            $this->skippedBecauseOverlapping = true;
+            $this->dispatchSchedulerEvent(new \Crustum\Scheduling\Event\ScheduledTaskSkipped($this));
 
             return;
         }
+
+        $this->ensureMutexIsReleasedOnSignal();
 
         if ($this->isRepeatable()) {
             $this->lastChecked = Chronos::now();
@@ -289,7 +301,7 @@ class Event
     public function callBeforeCallbacks(): void
     {
         foreach ($this->beforeCallbacks as $callback) {
-            call_user_func($callback);
+            $this->callEventCallback($callback);
         }
     }
 
@@ -301,8 +313,49 @@ class Event
     public function callAfterCallbacks(): void
     {
         foreach ($this->afterCallbacks as $callback) {
-            call_user_func($callback);
+            $this->callEventCallback($callback);
         }
+    }
+
+    /**
+     * Call the given event callback, injecting this event when type-hinted.
+     *
+     * @param callable $callback The callback
+     * @return mixed
+     */
+    protected function callEventCallback(callable $callback): mixed
+    {
+        if ($callback instanceof \Closure) {
+            $parameters = $this->eventParametersForCallback($callback);
+            if ($parameters !== []) {
+                return $callback(...$parameters);
+            }
+        }
+
+        return call_user_func($callback);
+    }
+
+    /**
+     * Get event injection parameters for the given callback.
+     *
+     * @param \Closure $callback The callback
+     * @return array<string, mixed>
+     */
+    protected function eventParametersForCallback(\Closure $callback): array
+    {
+        $reflection = new \ReflectionFunction($callback);
+
+        foreach ($reflection->getParameters() as $parameter) {
+            $type = $parameter->getType();
+            if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+                $typeName = $type->getName();
+                if (is_a($this, $typeName)) {
+                    return [$parameter->getName() => $this];
+                }
+            }
+        }
+
+        return [];
     }
 
     /**
@@ -341,6 +394,16 @@ class Event
     public function runsInMaintenanceMode(): bool
     {
         return $this->evenInMaintenanceMode;
+    }
+
+    /**
+     * Determine if the event runs when the scheduler is paused.
+     *
+     * @return bool
+     */
+    public function runsWhenPaused(): bool
+    {
+        return $this->evenWhenPaused;
     }
 
     /**
@@ -388,15 +451,13 @@ class Event
     public function filtersPass(): bool
     {
         foreach ($this->filters as $callback) {
-            $result = call_user_func($callback);
-            if (!$result) {
+            if (!$this->callEventCallback($callback)) {
                 return false;
             }
         }
 
         foreach ($this->rejects as $callback) {
-            $result = call_user_func($callback);
-            if ($result) {
+            if ($this->callEventCallback($callback)) {
                 return false;
             }
         }
@@ -449,9 +510,9 @@ class Event
      */
     public function onSuccess(callable $callback)
     {
-        return $this->then(function ($app) use ($callback): void {
+        return $this->then(function () use ($callback): void {
             if ($this->exitCode === 0) {
-                $app->call($callback);
+                $this->callEventCallback($callback);
             }
         });
     }
@@ -464,9 +525,9 @@ class Event
      */
     public function onFailure(callable $callback)
     {
-        return $this->then(function ($app) use ($callback): void {
+        return $this->then(function () use ($callback): void {
             if ($this->exitCode !== 0) {
-                $app->call($callback);
+                $this->callEventCallback($callback);
             }
         });
     }
@@ -531,6 +592,39 @@ class Event
     {
         if ($this->withoutOverlapping) {
             $this->mutex->forget($this);
+        }
+    }
+
+    /**
+     * Ensure the mutex is released if the process receives a termination signal.
+     *
+     * @return void
+     */
+    protected function ensureMutexIsReleasedOnSignal(): void
+    {
+        if (
+            !$this->releaseOnTerminationSignals
+            || $this->runInBackground
+            || !\SignalHandler\Signal\SignalRegistry::isSupported()
+        ) {
+            return;
+        }
+
+        $registry = new \SignalHandler\Signal\SignalRegistry();
+        $release = function () use ($registry): void {
+            $this->removeMutex();
+            $registry->unregister();
+            exit(1);
+        };
+
+        foreach (
+            [
+            \SignalHandler\Signal\Signal::SIGTERM,
+            \SignalHandler\Signal\Signal::SIGINT,
+            \SignalHandler\Signal\Signal::SIGQUIT,
+            ] as $signal
+        ) {
+            $registry->register($signal, $release);
         }
     }
 

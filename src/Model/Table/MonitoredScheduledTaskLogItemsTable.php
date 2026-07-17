@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Model\Table;
+namespace Crustum\Scheduling\Model\Table;
 
 use Cake\Core\Configure;
 use Cake\I18n\DateTime;
@@ -9,25 +9,26 @@ use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
-use Scheduling\Model\Entity\MonitoredScheduledTaskLogItem;
+use Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem;
 
 /**
  * MonitoredScheduledTaskLogItems Model
  *
- * @property \Scheduling\Model\Table\MonitoredScheduledTasksTable $MonitoredScheduledTasks
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem newEmptyEntity()
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem newEntity(array<string, mixed> $data, array<string, mixed> $options = [])
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem[] newEntities(array<array<string, mixed>> $data, array<string, mixed> $options = [])
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem get($primaryKey, $options = [])
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem findOrCreate($search, ?callable $callback = null, $options = [])
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem patchEntity(\Cake\Datasource\EntityInterface $entity, array<string, mixed> $data, array<string, mixed> $options = [])
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem[] patchEntities(iterable<\Cake\Datasource\EntityInterface> $entities, array<string, mixed> $data, array<string, mixed> $options = [])
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem|false save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem[]|\Cake\Datasource\ResultSetInterface|false saveMany(iterable<\Cake\Datasource\EntityInterface> $entities, $options = [])
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem[]|\Cake\Datasource\ResultSetInterface saveManyOrFail(iterable<\Cake\Datasource\EntityInterface> $entities, $options = [])
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable<\Cake\Datasource\EntityInterface> $entities, $options = [])
- * @method \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable<\Cake\Datasource\EntityInterface> $entities, $options = [])
+ * @extends \Cake\ORM\Table<array{}, \Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem>
+ * @property \Crustum\Scheduling\Model\Table\MonitoredScheduledTasksTable $MonitoredScheduledTasks
+ * @method \Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem newEmptyEntity()
+ * @method \Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem newEntity(array<string, mixed> $data, array<string, mixed> $options = [])
+ * @method array<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem> newEntities(array<array<string, mixed>> $data, array<string, mixed> $options = [])
+ * @method \Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem get(mixed $primaryKey, array<string, mixed>|string $finder = 'all', mixed ...$args)
+ * @method \Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem findOrCreate($search, ?callable $callback = null, $options = [])
+ * @method \Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem patchEntity(\Cake\Datasource\EntityInterface $entity, array<string, mixed> $data, array<string, mixed> $options = [])
+ * @method array<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem> patchEntities(iterable<\Cake\Datasource\EntityInterface> $entities, array<string, mixed> $data, array<string, mixed> $options = [])
+ * @method \Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem|false save(\Cake\Datasource\EntityInterface $entity, $options = [])
+ * @method \Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
+ * @method iterable<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem>|false saveMany(iterable<\Cake\Datasource\EntityInterface> $entities, $options = [])
+ * @method iterable<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem> saveManyOrFail(iterable<\Cake\Datasource\EntityInterface> $entities, $options = [])
+ * @method iterable<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem>|false deleteMany(iterable<\Cake\Datasource\EntityInterface> $entities, $options = [])
+ * @method iterable<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem> deleteManyOrFail(iterable<\Cake\Datasource\EntityInterface> $entities, $options = [])
  */
 class MonitoredScheduledTaskLogItemsTable extends Table
 {
@@ -52,7 +53,7 @@ class MonitoredScheduledTaskLogItemsTable extends Table
         $this->belongsTo('MonitoredScheduledTasks', [
             'foreignKey' => 'monitored_scheduled_task_id',
             'joinType' => 'INNER',
-            'className' => 'Scheduling.MonitoredScheduledTasks',
+            'className' => 'Crustum/Scheduling.MonitoredScheduledTasks',
         ]);
     }
 
@@ -110,9 +111,9 @@ class MonitoredScheduledTaskLogItemsTable extends Table
     /**
      * Find log items by type.
      *
-     * @param \Cake\ORM\Query\SelectQuery $query The query to modify
+     * @param \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem> $query The query to modify
      * @param array<string, mixed> $options The options containing the type
-     * @return \Cake\ORM\Query\SelectQuery
+     * @return \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem>
      */
     public function findByType(SelectQuery $query, array $options): SelectQuery
     {
@@ -122,9 +123,9 @@ class MonitoredScheduledTaskLogItemsTable extends Table
     /**
      * Find log items for a specific task.
      *
-     * @param \Cake\ORM\Query\SelectQuery $query The query to modify
+     * @param \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem> $query The query to modify
      * @param array<string, mixed> $options The options containing the task ID
-     * @return \Cake\ORM\Query\SelectQuery
+     * @return \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem>
      */
     public function findByTask(SelectQuery $query, array $options): SelectQuery
     {
@@ -134,9 +135,9 @@ class MonitoredScheduledTaskLogItemsTable extends Table
     /**
      * Find log items by task name.
      *
-     * @param \Cake\ORM\Query\SelectQuery $query The query to modify
+     * @param \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem> $query The query to modify
      * @param array<string, mixed> $options The options containing the task name
-     * @return \Cake\ORM\Query\SelectQuery
+     * @return \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem>
      */
     public function findByTaskName(SelectQuery $query, array $options): SelectQuery
     {
@@ -148,9 +149,9 @@ class MonitoredScheduledTaskLogItemsTable extends Table
     /**
      * Find recent log items.
      *
-     * @param \Cake\ORM\Query\SelectQuery $query The query to modify
+     * @param \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem> $query The query to modify
      * @param array<string, mixed> $options The options containing the hours
-     * @return \Cake\ORM\Query\SelectQuery
+     * @return \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem>
      */
     public function findRecent(SelectQuery $query, array $options): SelectQuery
     {
@@ -163,9 +164,9 @@ class MonitoredScheduledTaskLogItemsTable extends Table
     /**
      * Find log items with failures.
      *
-     * @param \Cake\ORM\Query\SelectQuery $query The query to modify
+     * @param \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem> $query The query to modify
      * @param array<string, mixed> $options The options
-     * @return \Cake\ORM\Query\SelectQuery
+     * @return \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem>
      */
     public function findFailures(SelectQuery $query, array $options): SelectQuery
     {
@@ -175,9 +176,9 @@ class MonitoredScheduledTaskLogItemsTable extends Table
     /**
      * Find log items with successful completions.
      *
-     * @param \Cake\ORM\Query\SelectQuery $query The query to modify
+     * @param \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem> $query The query to modify
      * @param array<string, mixed> $options The options
-     * @return \Cake\ORM\Query\SelectQuery
+     * @return \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem>
      */
     public function findSuccesses(SelectQuery $query, array $options): SelectQuery
     {
@@ -187,9 +188,9 @@ class MonitoredScheduledTaskLogItemsTable extends Table
     /**
      * Find log items by date range.
      *
-     * @param \Cake\ORM\Query\SelectQuery $query The query to modify
+     * @param \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem> $query The query to modify
      * @param array<string, mixed> $options The options containing start and end dates
-     * @return \Cake\ORM\Query\SelectQuery
+     * @return \Cake\ORM\Query\SelectQuery<\Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem>
      */
     public function findByDateRange(SelectQuery $query, array $options): SelectQuery
     {
@@ -212,7 +213,7 @@ class MonitoredScheduledTaskLogItemsTable extends Table
      * @param int $taskId The monitored scheduled task ID
      * @param string $type The log item type
      * @param array<string, mixed> $meta The metadata
-     * @return \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem
+     * @return \Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem
      */
     public function createLogItem(int $taskId, string $type, array $meta = []): MonitoredScheduledTaskLogItem
     {
@@ -231,7 +232,7 @@ class MonitoredScheduledTaskLogItemsTable extends Table
      *
      * @param int $taskId The monitored scheduled task ID
      * @param int $limit The maximum number of items to return
-     * @return \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem[]
+     * @return \Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem[]
      */
     public function getTaskLogItems(int $taskId, int $limit = 50): array
     {
@@ -245,7 +246,7 @@ class MonitoredScheduledTaskLogItemsTable extends Table
      * Get the latest log item for a task.
      *
      * @param int $taskId The monitored scheduled task ID
-     * @return \Scheduling\Model\Entity\MonitoredScheduledTaskLogItem|null
+     * @return \Crustum\Scheduling\Model\Entity\MonitoredScheduledTaskLogItem|null
      */
     public function getLatestLogItem(int $taskId): ?MonitoredScheduledTaskLogItem
     {

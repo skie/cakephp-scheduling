@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Test\TestCase\Command;
+namespace Crustum\Scheduling\Test\TestCase\Command;
 
 use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\Core\Configure;
 use Cake\TestSuite\TestCase;
-use Scheduling\Schedule;
+use Crustum\Scheduling\Schedule;
 
 class ScheduleRunCommandTest extends TestCase
 {

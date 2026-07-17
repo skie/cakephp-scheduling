@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Model\Entity;
+namespace Crustum\Scheduling\Model\Entity;
 
 use Cake\ORM\Entity;
 
@@ -14,7 +14,7 @@ use Cake\ORM\Entity;
  * @property array<string, mixed>|null $meta
  * @property \Cake\I18n\DateTime|null $created
  *
- * @property \Scheduling\Model\Entity\MonitoredScheduledTask $monitored_scheduled_task
+ * @property \Crustum\Scheduling\Model\Entity\MonitoredScheduledTask $monitored_scheduled_task
  */
 class MonitoredScheduledTaskLogItem extends Entity
 {

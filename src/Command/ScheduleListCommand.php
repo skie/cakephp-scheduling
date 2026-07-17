@@ -1,11 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Command;
+namespace Crustum\Scheduling\Command;
 
 use Cake\Console\Arguments;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
+use Cake\Core\Configure;
+use Crustum\Scheduling\CronExpressionTimezoneConverter;
+use Crustum\Scheduling\Event;
+use DateTimeZone;
 
 /**
  * Schedule List Command
@@ -33,7 +37,12 @@ class ScheduleListCommand extends BaseSchedulerCommand
     protected function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
     {
         $parser = parent::buildOptionParser($parser);
-        $parser->setDescription(self::getDescription());
+        $parser
+            ->setDescription(self::getDescription())
+            ->addOption('timezone', [
+                'help' => 'The timezone that times and expressions should be displayed in',
+                'default' => null,
+            ]);
 
         return $parser;
     }
@@ -50,39 +59,69 @@ class ScheduleListCommand extends BaseSchedulerCommand
         $schedule = $this->getSchedule();
         $events = $schedule->events();
 
-        if (empty($events)) {
+        if ($events === []) {
             $io->info('No scheduled events are defined.');
 
             return static::CODE_SUCCESS;
         }
 
+        $displayTimezone = $this->resolveDisplayTimezone($args);
+
         $io->info(sprintf('Found %d scheduled event(s):', count($events)));
         $io->out('');
 
         $verbose = (bool)$args->getOption('verbose');
+        $index = 0;
 
-        foreach ($events as $index => $event) {
-            $this->displayEvent($event, (int)$index + 1, $io, $verbose);
+        foreach ($events as $event) {
+            $expressions = CronExpressionTimezoneConverter::forEvent($event, $displayTimezone);
+
+            foreach ($expressions as $expression) {
+                $index++;
+                $this->displayEvent($event, $index, $io, $verbose, $expression, $displayTimezone);
+            }
         }
 
         return static::CODE_SUCCESS;
     }
 
     /**
-     * Display information about a single event.
+     * Resolve the timezone used for list display.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Cake\Console\Arguments $args The command arguments
+     * @return \DateTimeZone
+     */
+    protected function resolveDisplayTimezone(Arguments $args): DateTimeZone
+    {
+        $timezone = $args->getOption('timezone')
+            ?: Configure::read('App.defaultTimezone')
+            ?: date_default_timezone_get();
+
+        return new DateTimeZone((string)$timezone);
+    }
+
+    /**
+     * Display information about a single event expression row.
+     *
+     * @param \Crustum\Scheduling\Event $event The event
      * @param int $index The event index
      * @param \Cake\Console\ConsoleIo $io The console io
      * @param bool $verbose Whether to show verbose information
+     * @param string $expression The display cron expression
+     * @param \DateTimeZone $displayTimezone The display timezone
      * @return void
      */
-    protected function displayEvent($event, int $index, ConsoleIo $io, bool $verbose): void
-    {
+    protected function displayEvent(
+        Event $event,
+        int $index,
+        ConsoleIo $io,
+        bool $verbose,
+        string $expression,
+        DateTimeZone $displayTimezone
+    ): void {
         $summary = $event->getSummaryForDisplay();
-        $expression = $event->getExpression();
         $repeatExpression = $this->getRepeatExpression($event);
-        $nextRun = $event->nextRunDate();
+        $nextRun = $event->nextRunDate()->setTimezone($displayTimezone);
 
         $io->out(sprintf('<info>%d.</info> %s', $index, $summary));
         $io->out(sprintf('    Expression: %s%s', $expression, $repeatExpression));
@@ -98,11 +137,11 @@ class ScheduleListCommand extends BaseSchedulerCommand
     /**
      * Display verbose information about an event.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @param \Cake\Console\ConsoleIo $io The console io
      * @return void
      */
-    protected function displayVerboseInfo($event, ConsoleIo $io): void
+    protected function displayVerboseInfo(Event $event, ConsoleIo $io): void
     {
         if ($event->withoutOverlapping) {
             $mutexExists = $event->mutex->exists($event);
@@ -116,7 +155,7 @@ class ScheduleListCommand extends BaseSchedulerCommand
 
         if ($event->timezone) {
             $timezone = is_string($event->timezone) ? $event->timezone : $event->timezone->getName();
-            $io->out(sprintf('    Timezone: %s', $timezone));
+            $io->out(sprintf('    Event Timezone: %s', $timezone));
         }
 
         if ($event->user) {
@@ -125,6 +164,10 @@ class ScheduleListCommand extends BaseSchedulerCommand
 
         if ($event->evenInMaintenanceMode) {
             $io->out('    Maintenance: Runs even in maintenance mode');
+        }
+
+        if ($event->evenWhenPaused) {
+            $io->out('    Pause: Runs even when scheduler is paused');
         }
 
         if ($event->runInBackground) {
@@ -143,10 +186,10 @@ class ScheduleListCommand extends BaseSchedulerCommand
     /**
      * Get the repeat expression for an event.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @return string The repeat expression
      */
-    protected function getRepeatExpression($event): string
+    protected function getRepeatExpression(Event $event): string
     {
         return $event->isRepeatable() ? " (every {$event->repeatSeconds}s)" : '';
     }

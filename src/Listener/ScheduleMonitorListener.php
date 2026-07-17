@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Listener;
+namespace Crustum\Scheduling\Listener;
 
 use Cake\Event\EventInterface;
 use Cake\Event\EventListenerInterface;
 use Cake\ORM\TableRegistry;
-use Scheduling\SchedulingMonitor;
+use Crustum\Scheduling\SchedulingMonitor;
 
 /**
  * Schedule Monitor Listener
@@ -47,8 +47,8 @@ class ScheduleMonitorListener implements EventListenerInterface
         $taskName = $this->getTaskName($task);
 
         if ($taskName) {
-            /** @var \Scheduling\Model\Table\MonitoredScheduledTasksTable $MonitoredTasks */
-            $MonitoredTasks = TableRegistry::getTableLocator()->get('Scheduling.MonitoredScheduledTasks');
+            /** @var \Crustum\Scheduling\Model\Table\MonitoredScheduledTasksTable $MonitoredTasks */
+            $MonitoredTasks = TableRegistry::getTableLocator()->get('Crustum/Scheduling.MonitoredScheduledTasks');
             $MonitoredTasks->markAsStarting($taskName, [
                 'memory' => memory_get_usage(true),
             ]);
@@ -73,8 +73,8 @@ class ScheduleMonitorListener implements EventListenerInterface
 
         if ($taskName) {
             $runtime = $event->getData('runtime') ?? 0;
-            /** @var \Scheduling\Model\Table\MonitoredScheduledTasksTable $MonitoredTasks */
-            $MonitoredTasks = TableRegistry::getTableLocator()->get('Scheduling.MonitoredScheduledTasks');
+            /** @var \Crustum\Scheduling\Model\Table\MonitoredScheduledTasksTable $MonitoredTasks */
+            $MonitoredTasks = TableRegistry::getTableLocator()->get('Crustum/Scheduling.MonitoredScheduledTasks');
 
             $meta = [
                 'runtime' => $runtime,
@@ -111,8 +111,8 @@ class ScheduleMonitorListener implements EventListenerInterface
 
         if ($taskName) {
             $exception = $event->getData('exception');
-            /** @var \Scheduling\Model\Table\MonitoredScheduledTasksTable $MonitoredTasks */
-            $MonitoredTasks = TableRegistry::getTableLocator()->get('Scheduling.MonitoredScheduledTasks');
+            /** @var \Crustum\Scheduling\Model\Table\MonitoredScheduledTasksTable $MonitoredTasks */
+            $MonitoredTasks = TableRegistry::getTableLocator()->get('Crustum/Scheduling.MonitoredScheduledTasks');
 
             $meta = [
                 'failure_message' => $exception ? $exception->getMessage() : 'Unknown error',
@@ -149,8 +149,8 @@ class ScheduleMonitorListener implements EventListenerInterface
 
         if ($taskName) {
             $reason = $event->getData('reason') ?? 'Unknown';
-            /** @var \Scheduling\Model\Table\MonitoredScheduledTasksTable $MonitoredTasks */
-            $MonitoredTasks = TableRegistry::getTableLocator()->get('Scheduling.MonitoredScheduledTasks');
+            /** @var \Crustum\Scheduling\Model\Table\MonitoredScheduledTasksTable $MonitoredTasks */
+            $MonitoredTasks = TableRegistry::getTableLocator()->get('Crustum/Scheduling.MonitoredScheduledTasks');
             $MonitoredTasks->markAsSkipped($taskName, [
                 'skip_reason' => $reason,
             ]);
@@ -184,7 +184,7 @@ class ScheduleMonitorListener implements EventListenerInterface
     /**
      * Get the task output for storage.
      *
-     * @param \Scheduling\Event $task The scheduled task
+     * @param \Crustum\Scheduling\Event $task The scheduled task
      * @return string|null
      */
     private function getTaskOutput($task): ?string

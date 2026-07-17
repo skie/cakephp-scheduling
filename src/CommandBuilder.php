@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling;
+namespace Crustum\Scheduling;
 
 /**
  * Command Builder
@@ -13,7 +13,7 @@ class CommandBuilder
     /**
      * Build the command for the given event.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @return string The built command
      */
     public function buildCommand(Event $event): string
@@ -28,7 +28,7 @@ class CommandBuilder
     /**
      * Build the command for running the event in the foreground.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @return string The built command
      */
     protected function buildForegroundCommand(Event $event): string
@@ -46,7 +46,7 @@ class CommandBuilder
     /**
      * Build the command for running the event in the background.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @return string The built command
      */
     protected function buildBackgroundCommand(Event $event): string
@@ -71,13 +71,17 @@ class CommandBuilder
     /**
      * Finalize the event's command syntax with the correct user.
      *
-     * @param \Scheduling\Event $event The event
+     * @param \Crustum\Scheduling\Event $event The event
      * @param string $command The command
      * @return string The final command
      */
     protected function ensureCorrectUser(Event $event, string $command): string
     {
-        return $event->user && !$this->isWindows() ? 'sudo -u ' . $event->user . ' -- sh -c \'' . $command . '\'' : $command;
+        if (!$event->user || self::isWindows()) {
+            return $command;
+        }
+
+        return 'sudo -u ' . $event->user . ' -- sh -c ' . $this->escapeArgument($command);
     }
 
     /**

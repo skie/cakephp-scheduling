@@ -1,26 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace Scheduling\Event;
+namespace Crustum\Scheduling\Event;
 
 use Cake\Event\Event;
-use Scheduling\Command\BaseSchedulerCommand;
-use Scheduling\Event as ScheduledEvent;
+use Crustum\Scheduling\Command\BaseSchedulerCommand;
+use Crustum\Scheduling\Event as ScheduledEvent;
 
 /**
  * Scheduled Task Starting Event
  *
  * Dispatched when a scheduled task is about to start.
  *
- * @extends \Cake\Event\Event<\Scheduling\Command\BaseSchedulerCommand>
+ * @extends \Cake\Event\Event<\Crustum\Scheduling\Command\BaseSchedulerCommand>
  */
 class ScheduledTaskStarting extends Event
 {
     /**
      * Create a new event instance.
      *
-     * @param \Scheduling\Command\BaseSchedulerCommand $subject The command that triggered this event
-     * @param \Scheduling\Event $event The scheduled event
+     * @param \Crustum\Scheduling\Command\BaseSchedulerCommand $subject The command that triggered this event
+     * @param \Crustum\Scheduling\Event $event The scheduled event
      */
     public function __construct(BaseSchedulerCommand $subject, ScheduledEvent $event)
     {
