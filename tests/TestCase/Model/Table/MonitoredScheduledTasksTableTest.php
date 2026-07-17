@@ -20,6 +20,7 @@ class MonitoredScheduledTasksTableTest extends TestCase
 
         $this->table = TableRegistry::getTableLocator()->get('Crustum/Scheduling.MonitoredScheduledTasks');
         $this->table->deleteAll([]);
+
         $logTable = TableRegistry::getTableLocator()->get('Crustum/Scheduling.MonitoredScheduledTaskLogItems');
         $logTable->deleteAll([]);
     }

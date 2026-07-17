@@ -17,7 +17,7 @@ class ScheduleMonitorListCommandTest extends TestCase
         parent::setUp();
         $this->setAppNamespace();
         $this->configApplication(
-            'TestApp\Application',
+            \TestApp\Application::class,
             [PLUGIN_TESTS . 'TestApp' . DS . 'config'],
         );
     }

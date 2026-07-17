@@ -124,7 +124,7 @@ class EventTest extends TestCase
     public function testEventFiltersPreventExecution(): void
     {
         $event = $this->createEvent('php -v');
-        $event->when(function () {
+        $event->when(function (): false {
             return false; // Never run
         });
 
@@ -134,9 +134,7 @@ class EventTest extends TestCase
     public function testEventFiltersAllowExecution(): void
     {
         $event = $this->createEvent('php -v');
-        $event->when(function () {
-            return true;
-        });
+        $event->when(fn(): true => true);
 
         $this->assertTrue($event->filtersPass());
     }
@@ -153,9 +151,7 @@ class EventTest extends TestCase
     public function testWhenWithCallable(): void
     {
         $event = $this->createEvent('php -v');
-        $result = $event->when(function () {
-            return true;
-        });
+        $result = $event->when(fn(): true => true);
 
         $this->assertSame($event, $result);
         $this->assertTrue($event->filtersPass());
@@ -180,12 +176,8 @@ class EventTest extends TestCase
     public function testWhenWithMultipleFilters(): void
     {
         $event = $this->createEvent('php -v');
-        $event->when(function () {
-            return true;
-        });
-        $event->when(function () {
-            return true;
-        });
+        $event->when(fn(): true => true);
+        $event->when(fn(): true => true);
 
         $this->assertTrue($event->filtersPass());
     }
@@ -193,12 +185,8 @@ class EventTest extends TestCase
     public function testWhenWithMultipleFiltersOneFails(): void
     {
         $event = $this->createEvent('php -v');
-        $event->when(function () {
-            return true;
-        });
-        $event->when(function () {
-            return false;
-        });
+        $event->when(fn(): true => true);
+        $event->when(fn(): false => false);
 
         $this->assertFalse($event->filtersPass());
     }
@@ -206,9 +194,7 @@ class EventTest extends TestCase
     public function testSkipWithCallable(): void
     {
         $event = $this->createEvent('php -v');
-        $result = $event->skip(function () {
-            return false;
-        });
+        $result = $event->skip(fn(): false => false);
 
         $this->assertSame($event, $result);
         $this->assertTrue($event->filtersPass());
@@ -217,9 +203,7 @@ class EventTest extends TestCase
     public function testSkipWithCallableReturningTrue(): void
     {
         $event = $this->createEvent('php -v');
-        $event->skip(function () {
-            return true;
-        });
+        $event->skip(fn(): true => true);
 
         $this->assertFalse($event->filtersPass());
     }
@@ -318,12 +302,8 @@ class EventTest extends TestCase
     public function testFiltersPassWithWhenAndSkip(): void
     {
         $event = $this->createEvent('php -v');
-        $event->when(function () {
-            return true;
-        });
-        $event->skip(function () {
-            return false;
-        });
+        $event->when(fn(): true => true);
+        $event->skip(fn(): false => false);
 
         $this->assertTrue($event->filtersPass());
     }
@@ -331,12 +311,8 @@ class EventTest extends TestCase
     public function testFiltersPassWithWhenAndSkipRejecting(): void
     {
         $event = $this->createEvent('php -v');
-        $event->when(function () {
-            return true;
-        });
-        $event->skip(function () {
-            return true;
-        });
+        $event->when(fn(): true => true);
+        $event->skip(fn(): true => true);
 
         $this->assertFalse($event->filtersPass());
     }

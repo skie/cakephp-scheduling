@@ -12,6 +12,7 @@ use Crustum\Scheduling\Service\ScheduleMonitorService;
 class ScheduleMonitorServiceTest extends TestCase
 {
     protected Schedule $schedule;
+
     protected ScheduleMonitorService $service;
 
     protected function setUp(): void
@@ -142,9 +143,7 @@ class ScheduleMonitorServiceTest extends TestCase
 
     public function testSyncMonitoredTasksGeneratesNameForCallbacksWithoutName(): void
     {
-        $this->schedule->call(function () {
-            return true;
-        })->everyMinute()->useMonitoring();
+        $this->schedule->call(fn(): true => true)->everyMinute()->useMonitoring();
 
         $result = $this->service->syncMonitoredTasks();
 
@@ -226,9 +225,7 @@ class ScheduleMonitorServiceTest extends TestCase
     public function testSyncMonitoredTasksHandlesCallbackEvents(): void
     {
         $taskName = 'test-callback-' . uniqid();
-        $this->schedule->call(function () {
-            return true;
-        })->everyMinute()->useMonitoring()->monitorName($taskName);
+        $this->schedule->call(fn(): true => true)->everyMinute()->useMonitoring()->monitorName($taskName);
 
         $result = $this->service->syncMonitoredTasks();
 

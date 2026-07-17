@@ -12,6 +12,7 @@ use Crustum\Scheduling\Schedule;
 class PendingEventAttributesTest extends TestCase
 {
     protected Schedule $schedule;
+
     protected PendingEventAttributes $attributes;
 
     protected function setUp(): void
@@ -129,9 +130,7 @@ class PendingEventAttributesTest extends TestCase
         $mutex = new CacheEventMutex();
         $event = new Event($mutex, 'test:command');
 
-        $this->attributes->when(function () {
-            return true;
-        });
+        $this->attributes->when(fn(): true => true);
 
         $this->attributes->mergeAttributes($event);
 
@@ -143,9 +142,7 @@ class PendingEventAttributesTest extends TestCase
         $mutex = new CacheEventMutex();
         $event = new Event($mutex, 'test:command');
 
-        $this->attributes->skip(function () {
-            return true;
-        });
+        $this->attributes->skip(fn(): true => true);
 
         $this->attributes->mergeAttributes($event);
 

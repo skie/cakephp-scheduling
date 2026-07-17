@@ -17,7 +17,7 @@ class ScheduleRunCommandTest extends TestCase
         parent::setUp();
         $this->setAppNamespace();
         $this->configApplication(
-            'TestApp\Application',
+            \TestApp\Application::class,
             [PLUGIN_TESTS . 'TestApp' . DS . 'config'],
         );
 
@@ -42,9 +42,7 @@ class ScheduleRunCommandTest extends TestCase
         $schedule->command('echo "test"')->everyMinute();
 
         // Override the container to use our real schedule
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule run -v');
 
@@ -63,9 +61,7 @@ class ScheduleRunCommandTest extends TestCase
         $schedule->command('echo "test"')->everyMinute();
 
         // Override the container to use our real schedule
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule run -v');
 

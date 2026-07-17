@@ -50,7 +50,7 @@ class ScheduleTest extends TestCase
         $schedule = $this->createSchedule();
         $event1 = $schedule->command('php -v')->daily();
         $event1->repeatSeconds = 10;
-        $event2 = $schedule->command('php -m')->daily();
+        $schedule->command('php -m')->daily();
 
         $events = $schedule->events();
 
@@ -74,9 +74,7 @@ class ScheduleTest extends TestCase
     public function testScheduleHandlesCallbackEvents(): void
     {
         $schedule = $this->createSchedule();
-        $callback = function () {
-            return 'test result';
-        };
+        $callback = (fn(): string => 'test result');
 
         $event = $schedule->call($callback);
 

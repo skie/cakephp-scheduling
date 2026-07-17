@@ -21,9 +21,7 @@ class CallbackEventTest extends TestCase
 
     public function testConstructorWithCallable(): void
     {
-        $callback = function () {
-            return 'test';
-        };
+        $callback = (fn(): string => 'test');
 
         $event = new CallbackEvent($this->mutex, $callback);
 
@@ -47,9 +45,7 @@ class CallbackEventTest extends TestCase
 
     public function testConstructorWithParameters(): void
     {
-        $callback = function ($a, $b) {
-            return $a + $b;
-        };
+        $callback = fn($a, $b): float|int|array => $a + $b;
 
         $event = new CallbackEvent($this->mutex, $callback, [1, 2]);
 
@@ -59,7 +55,7 @@ class CallbackEventTest extends TestCase
     public function testExecuteWithCallable(): void
     {
         $result = null;
-        $callback = function () use (&$result) {
+        $callback = function () use (&$result): true {
             $result = 'executed';
 
             return true;
@@ -88,9 +84,7 @@ class CallbackEventTest extends TestCase
 
     public function testExecuteWithFalseReturn(): void
     {
-        $callback = function () {
-            return false;
-        };
+        $callback = (fn(): false => false);
 
         $event = new CallbackEvent($this->mutex, $callback);
         $reflection = new \ReflectionClass($event);
@@ -141,9 +135,7 @@ class CallbackEventTest extends TestCase
 
     public function testShouldSkipDueToOverlappingWithDescription(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
         $event->name('test-event');
 
         $result = $event->shouldSkipDueToOverlapping();
@@ -153,9 +145,7 @@ class CallbackEventTest extends TestCase
 
     public function testShouldSkipDueToOverlappingWithoutDescription(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
 
         $result = $event->shouldSkipDueToOverlapping();
 
@@ -164,9 +154,7 @@ class CallbackEventTest extends TestCase
 
     public function testRunInBackgroundThrowsException(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Scheduled closures can not be run in the background.');
@@ -176,9 +164,7 @@ class CallbackEventTest extends TestCase
 
     public function testWithoutOverlappingRequiresName(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
 
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage("A scheduled event name is required to prevent overlapping. Use the 'name' method before 'withoutOverlapping'.");
@@ -188,9 +174,7 @@ class CallbackEventTest extends TestCase
 
     public function testWithoutOverlappingWithName(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
         $event->name('test-event');
 
         $result = $event->withoutOverlapping(60);
@@ -200,9 +184,7 @@ class CallbackEventTest extends TestCase
 
     public function testOnOneServerRequiresName(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
 
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage("A scheduled event name is required to only run on one server. Use the 'name' method before 'onOneServer'.");
@@ -212,9 +194,7 @@ class CallbackEventTest extends TestCase
 
     public function testOnOneServerWithName(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
         $event->name('test-event');
 
         $result = $event->onOneServer();
@@ -224,9 +204,7 @@ class CallbackEventTest extends TestCase
 
     public function testGetSummaryForDisplayWithDescription(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
         $event->name('test-description');
 
         $summary = $event->getSummaryForDisplay();
@@ -245,9 +223,7 @@ class CallbackEventTest extends TestCase
 
     public function testGetSummaryForDisplayWithCallable(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
 
         $summary = $event->getSummaryForDisplay();
 
@@ -256,9 +232,7 @@ class CallbackEventTest extends TestCase
 
     public function testMutexName(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
         $event->name('test-event');
 
         $mutexName = $event->mutexName();
@@ -268,9 +242,7 @@ class CallbackEventTest extends TestCase
 
     public function testMutexNameWithoutDescription(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
 
         $mutexName = $event->mutexName();
 
@@ -279,9 +251,7 @@ class CallbackEventTest extends TestCase
 
     public function testRemoveMutexWithDescription(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
         $event->name('test-event');
 
         $reflection = new \ReflectionClass($event);
@@ -292,9 +262,7 @@ class CallbackEventTest extends TestCase
 
     public function testRemoveMutexWithoutDescription(): void
     {
-        $event = new CallbackEvent($this->mutex, function () {
-            return true;
-        });
+        $event = new CallbackEvent($this->mutex, fn(): true => true);
 
         $reflection = new \ReflectionClass($event);
         $method = $reflection->getMethod('removeMutex');

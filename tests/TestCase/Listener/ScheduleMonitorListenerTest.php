@@ -18,6 +18,7 @@ use Crustum\Scheduling\Listener\ScheduleMonitorListener;
 class ScheduleMonitorListenerTest extends TestCase
 {
     protected ScheduleMonitorListener $listener;
+
     protected EventManager $eventManager;
 
     protected function setUp(): void

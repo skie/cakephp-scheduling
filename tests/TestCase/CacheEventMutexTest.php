@@ -113,7 +113,7 @@ class CacheEventMutexTest extends TestCase
 
     public function testMutexNameIsConsistent(): void
     {
-        $mutex = new CacheEventMutex();
+        new CacheEventMutex();
         $event = $this->createEvent('php -v');
 
         $name1 = $event->mutexName();

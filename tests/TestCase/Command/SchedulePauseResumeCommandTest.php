@@ -17,7 +17,7 @@ class SchedulePauseResumeCommandTest extends TestCase
         parent::setUp();
         $this->setAppNamespace();
         $this->configApplication(
-            'TestApp\Application',
+            \TestApp\Application::class,
             [PLUGIN_TESTS . 'TestApp' . DS . 'config'],
         );
 
@@ -88,9 +88,7 @@ class SchedulePauseResumeCommandTest extends TestCase
             $ran = true;
         })->everyMinute();
 
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule run -v');
         $this->assertExitSuccess();
@@ -102,9 +100,7 @@ class SchedulePauseResumeCommandTest extends TestCase
             $ranWhenPaused = true;
         })->everyMinute()->evenWhenPaused();
 
-        $this->mockService(Schedule::class, function () use ($schedule2) {
-            return $schedule2;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule2);
 
         $this->exec('schedule run -v');
         $this->assertExitSuccess();

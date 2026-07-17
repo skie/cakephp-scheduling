@@ -124,7 +124,7 @@ class FrequencyTest extends TestCase
 
         $this->assertSame('0 0 31 * *', $this->event->lastDayOfMonth()->getExpression());
 
-        \Cake\Chronos\Chronos::setTestNow(null);
+        \Cake\Chronos\Chronos::setTestNow();
     }
 
     public function testTwiceMonthly(): void
@@ -149,7 +149,6 @@ class FrequencyTest extends TestCase
 
         $reflection = new \ReflectionClass($this->event);
         $method = $reflection->getMethod('repeatEvery');
-        $method->setAccessible(true);
         $method->invoke($this->event, 0);
     }
 

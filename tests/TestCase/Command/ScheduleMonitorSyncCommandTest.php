@@ -17,7 +17,7 @@ class ScheduleMonitorSyncCommandTest extends TestCase
         parent::setUp();
         $this->setAppNamespace();
         $this->configApplication(
-            'TestApp\Application',
+            \TestApp\Application::class,
             [PLUGIN_TESTS . 'TestApp' . DS . 'config'],
         );
     }
@@ -26,9 +26,7 @@ class ScheduleMonitorSyncCommandTest extends TestCase
     {
         $schedule = new Schedule();
         $schedule->command('test:command')->everyMinute()->useMonitoring()->monitorName('test-command');
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule monitor sync');
 
@@ -41,9 +39,7 @@ class ScheduleMonitorSyncCommandTest extends TestCase
     {
         $schedule = new Schedule();
         $schedule->command('test:command')->everyMinute()->useMonitoring()->monitorName('test-command');
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule monitor sync');
 
@@ -59,9 +55,7 @@ class ScheduleMonitorSyncCommandTest extends TestCase
     {
         $schedule = new Schedule();
         $schedule->command('test:command')->everyMinute()->useMonitoring()->monitorName('test-command');
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule monitor sync --dry-run');
 
@@ -84,9 +78,7 @@ class ScheduleMonitorSyncCommandTest extends TestCase
 
         $schedule = new Schedule();
         $schedule->command('test:command')->daily()->useMonitoring()->monitorName($taskName);
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule monitor sync');
 
@@ -110,9 +102,7 @@ class ScheduleMonitorSyncCommandTest extends TestCase
 
         $schedule = new Schedule();
         $schedule->command('test:command')->everyMinute()->useMonitoring()->monitorName('test-command');
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule monitor sync');
 

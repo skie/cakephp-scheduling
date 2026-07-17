@@ -17,7 +17,7 @@ class ScheduleListCommandTest extends TestCase
         parent::setUp();
         $this->setAppNamespace();
         $this->configApplication(
-            'TestApp\Application',
+            \TestApp\Application::class,
             [PLUGIN_TESTS . 'TestApp' . DS . 'config'],
         );
 
@@ -28,9 +28,7 @@ class ScheduleListCommandTest extends TestCase
     public function testListWithNoEvents(): void
     {
         $schedule = new Schedule();
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule list');
 
@@ -44,9 +42,7 @@ class ScheduleListCommandTest extends TestCase
         $schedule->command('echo "daily"')->daily();
         $schedule->command('echo "hourly"')->hourly();
 
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule list');
 
@@ -61,9 +57,7 @@ class ScheduleListCommandTest extends TestCase
         $schedule = new Schedule();
         $schedule->command('echo "test"')->daily()->description('Test command');
 
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule list --verbose');
 
@@ -78,9 +72,7 @@ class ScheduleListCommandTest extends TestCase
         $schedule = new Schedule();
         $schedule->command('echo "daily"')->dailyAt('08:00')->timezone('America/Los_Angeles');
 
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule list --timezone=UTC');
 
@@ -97,9 +89,7 @@ class ScheduleListCommandTest extends TestCase
         $schedule = new Schedule();
         $schedule->command('echo "twice"')->twiceDaily(13, 17)->timezone('America/Los_Angeles');
 
-        $this->mockService(Schedule::class, function () use ($schedule) {
-            return $schedule;
-        });
+        $this->mockService(Schedule::class, fn(): \Crustum\Scheduling\Schedule => $schedule);
 
         $this->exec('schedule list --timezone=UTC');
 
